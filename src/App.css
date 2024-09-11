@@ -1,38 +1,65 @@
-.App {
-  text-align: center;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.album-display {
+  background-color: #121212;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.landing-bg {
+  background-color: #121212;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+.landing-join {
+  width: 377px;
+}
+
+.join-code {
+  background-color: transparent;
+  border-bottom: 1px solid #6A6A6A;
+  width: 231px;
+  @media screen and (min-width: 768px) {
+    width: 100%;
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+.join-btn {
+  background-color: #68D570;
+  width: 231px;
+  @media screen and (min-width: 768px) {
+    width: 100%;
   }
 }
+
+.join-code {
+  &::placeholder {
+    color: #B9B9B9;
+  }
+  &:focus {
+    outline: none;
+  }
+}
+
+.host-btn {
+  background-color: #FFFFFF;
+  width: 231px;
+  @media screen and (min-width: 768px) {
+    width: 377px;
+  }
+}
+
+.dev-btn {
+  color: #B9B9B9;
+  background-color: transparent;
+  border: 1px solid #B9B9B9;
+  width: 150px;
+  height: 30px;
+}
+
+.album {
+  width: 300px;
+  @media screen and (max-width: 768px){
+    width: 250px;
+  }
+}
+
