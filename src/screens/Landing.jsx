@@ -6,9 +6,9 @@ import AlbumsDisplay from "../components/AlbumsDisplay";
 
 export default function Landing() {
   return (
-    <div className="relative h-screen overflow-hidden">
+    <div className="relative h-svh overflow-hidden">
       <AlbumsDisplay />
-      <div className="landing h-screen flex flex-col justify-around relative z-20">
+      <div className="landing h-svh flex flex-col justify-around relative z-20">
         <div className="landing-top flex flex-col items-center my-10">
           <img className="landing-logo p-12" src={logo} alt="" />
           <div className="landing-join flex flex-col items-center gap-8">
