@@ -17,11 +17,11 @@ export default function Landing() {
               type="text"
               placeholder="Enter Code"
             />
-            <HomeBtn style="join" text="Join game" />
+            <HomeBtn style="join-btn" text="Join game" />
           </div>
         </div>
         <div className="landing-bottom flex flex-col items-center gap-1 pt-20">
-          <HomeBtn style="host" text="Host game" />
+          <HomeBtn style="host-btn" text="Host game" />
           <div className="dev-links flex gap-5 m-5">
             <DevBtn dev="wilson" />
             <DevBtn dev="kenny" />
