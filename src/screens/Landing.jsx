@@ -9,7 +9,7 @@ export default function Landing() {
   return (
     <div className="relative h-svh overflow-hidden">
       <AlbumsDisplay />
-      <div className="landing flex flex-col justify-around relative z-20">
+      <div className="landing h-svh flex flex-col justify-around relative z-20">
         <div className="landing-top flex flex-col items-center my-10">
           <img className="landing-logo p-12" src={logo} alt="" />
           <div className="landing-join flex flex-col items-center gap-8">
@@ -18,7 +18,7 @@ export default function Landing() {
               type="text"
               placeholder="Enter Code"
             />
-            <Link to="/lobby" className="w-full">
+            <Link to="/lobby" className="w-full text-center">
               <HomeBtn style="join-btn" text="Join game" />
             </Link>
           </div>

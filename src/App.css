@@ -16,7 +16,7 @@
 
 .join-code {
   background-color: transparent;
-  border-bottom: 1px solid #6A6A6A;
+  border-bottom: 1px solid #6a6a6a;
   width: 231px;
 
   @media screen and (min-width: 768px) {
@@ -25,7 +25,7 @@
 }
 
 .join-btn {
-  background-color: #68D570;
+  background-color: #68d570;
   width: 231px;
 
   @media screen and (min-width: 768px) {
@@ -35,7 +35,7 @@
 
 .join-code {
   &::placeholder {
-    color: #B9B9B9;
+    color: #b9b9b9;
   }
 
   &:focus {
@@ -44,7 +44,7 @@
 }
 
 .host-btn {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   width: 231px;
 
   @media screen and (min-width: 768px) {
@@ -53,15 +53,15 @@
 }
 
 .dev-btn {
-  color: #B9B9B9;
+  color: #b9b9b9;
   background-color: transparent;
-  border: 1px solid #B9B9B9;
+  border: 1px solid #b9b9b9;
   width: 150px;
   height: 30px;
 }
 
 .leave-btn {
-  background-color: #68D570;
+  background-color: #68d570;
 }
 
 .album {
@@ -70,4 +70,34 @@
   @media screen and (max-width: 768px) {
     width: 250px;
   }
+}
+
+.lobby-info {
+  input {
+    background-color: #414141;
+    padding: 1rem;
+    &:focus {
+      outline: none;
+    }
+  }
+  .lobby-code-count {
+    display: flex;
+    width: 100%;
+  }
+  .lobby-container {
+    background-color: #242424;
+    padding: 1rem;
+    width: 100%;
+  }
+}
+
+.spotify-btn {
+  background-color: white;
+  color: black;
+  width: fit-content;
+  align-self: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25remh;
 }
