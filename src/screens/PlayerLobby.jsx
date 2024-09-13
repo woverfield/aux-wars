@@ -2,8 +2,18 @@ import React from "react";
 import AlbumsDisplay from "../components/AlbumsDisplay";
 import logo from "../images/aux-wars-logo.svg";
 import spotifyIcon from "../images/spotify-icon.svg";
+import settingsIcon from "../images/settings-btn.svg";
+import PlayerList from "../components/PlayerList";
+import { useState } from "react";
 
 export default function PlayerLobby() {
+  const [players, setPlayers] = useState([
+    { name: "Kenny Morales", isLinked: true },
+    { name: "Wilson Overfield", isLinked: true },
+    { name: "Lance Labumsher", isLinked: false },
+    { name: "Bob Smith", isLinked: true },
+  ]);
+
   return (
     <div className="relative h-svh overflow-hidden">
       <AlbumsDisplay />
@@ -18,7 +28,7 @@ export default function PlayerLobby() {
           </button>
         </div>
         <div className="lobby-body">
-          <div className="lobby-info flex flex-col sm:items-start container mx-auto px-5 py-4 text-white gap-5">
+          <div className="lobby-info flex flex-col sm:items-start container mx-auto px-5 py-4 text-white gap-10">
             <p className="text-xl">Nickname: </p>
             <div className="flex flex-col gap-5 sm:w-1/2 w-full">
               <input type="text" className="w-full rounded-md" />
@@ -29,7 +39,7 @@ export default function PlayerLobby() {
                 </div>
                 <div className="lobby-container rounded-md lobby-count flex flex-col gap-2">
                   <p className="text-xs font-normal">Players</p>
-                  <p className="text-2xl">5/8</p>
+                  <p className="text-2xl">4/8</p>
                 </div>
               </div>
               <button className="spotify-btn rounded-full py-2 px-8">
@@ -37,12 +47,14 @@ export default function PlayerLobby() {
                 <p className="text-sm md:text-base">Link with spotify</p>
               </button>
             </div>
-          </div>
-          <div className="lobby-players">
-            
+            <div className="flex sm:w-1/2 w-full items-baseline justify-between">
+              <p className="text-center text-2xl">Players</p>
+              <img src={settingsIcon} alt="" />
+            </div>
+            <PlayerList players={players} />
           </div>
         </div>
-        h
+        
       </div>
     </div>
   );

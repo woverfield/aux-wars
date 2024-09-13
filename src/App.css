@@ -99,5 +99,30 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.25remh;
+  gap: 0.25rem;
+}
+
+.lobby-players {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  font-weight: normal;
+}
+
+.lobby-player {
+  background-color: #242424;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem;
+}
+
+.linked {
+  color: #68d570;
+  font-weight: bold
+}
+
+.not-linked {
+  color: #FF2929;
+  font-weight: bold;
 }
