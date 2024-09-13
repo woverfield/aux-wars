@@ -3,12 +3,13 @@ import logo from "../images/landing-logo.svg";
 import HomeBtn from "../components/HomeBtn";
 import DevBtn from "../components/DevBtn";
 import AlbumsDisplay from "../components/AlbumsDisplay";
+import { Link } from "react-router-dom";
 
 export default function Landing() {
   return (
     <div className="relative h-svh overflow-hidden">
       <AlbumsDisplay />
-      <div className="landing h-svh flex flex-col justify-around relative z-20">
+      <div className="landing flex flex-col justify-around relative z-20">
         <div className="landing-top flex flex-col items-center my-10">
           <img className="landing-logo p-12" src={logo} alt="" />
           <div className="landing-join flex flex-col items-center gap-8">
@@ -17,7 +18,9 @@ export default function Landing() {
               type="text"
               placeholder="Enter Code"
             />
-            <HomeBtn style="join-btn" text="Join game" />
+            <Link to="/lobby" className="w-full">
+              <HomeBtn style="join-btn" text="Join game" />
+            </Link>
           </div>
         </div>
         <div className="landing-bottom flex flex-col items-center gap-1 pt-20">
