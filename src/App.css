@@ -75,20 +75,23 @@
 .lobby-info {
   input {
     background-color: #414141;
+    opacity: 75%;
     padding: 1rem;
     &:focus {
       outline: none;
     }
   }
-  .lobby-code-count {
-    display: flex;
-    width: 100%;
-  }
-  .lobby-container {
-    background-color: #242424;
-    padding: 1rem;
-    width: 100%;
-  }
+}
+
+.lobby-code-count {
+  display: flex;
+  width: 100%;
+}
+.lobby-container {
+  background-color: #242424;
+  padding: 1rem;
+  width: 100%;
+  opacity: 85%;
 }
 
 .spotify-btn {
@@ -115,14 +118,38 @@
   justify-content: space-between;
   width: 100%;
   padding: 1rem;
+  opacity: 85%;
 }
 
 .linked {
   color: #68d570;
-  font-weight: bold
+  font-weight: bold;
 }
 
 .not-linked {
-  color: #FF2929;
+  color: #ff2929;
   font-weight: bold;
+}
+
+.start-btn {
+  background-color: #68d570;
+}
+
+.settings-modal {
+  position: fixed;
+  background-color: #121212;
+  width: 100svw;
+  height: 100svh;
+  opacity: 70%;
+  top: 0;
+  color: white;
+  filter: blur(10px);
+  input {
+    background-color: #414141;
+    opacity: 75%;
+    padding: 1rem;
+    &:focus {
+      outline: none;
+    }
+  }
 }

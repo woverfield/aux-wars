@@ -5,6 +5,7 @@ import spotifyIcon from "../images/spotify-icon.svg";
 import settingsIcon from "../images/settings-btn.svg";
 import PlayerList from "../components/PlayerList";
 import { useState } from "react";
+import SettingsModal from "../components/SettingsModal";
 
 export default function PlayerLobby() {
   const [players, setPlayers] = useState([
@@ -12,7 +13,14 @@ export default function PlayerLobby() {
     { name: "Wilson Overfield", isLinked: true },
     { name: "Lance Labumsher", isLinked: false },
     { name: "Bob Smith", isLinked: true },
+    { name: "Bob Smith", isLinked: true },
+    { name: "Bob Smith", isLinked: true },
+    { name: "Bob Smith", isLinked: true },
   ]);
+
+  const [showModal, setShowModal] = useState(false);
+
+  const allPlayersReady = players.every((player) => player.isLinked);
 
   return (
     <div className="relative h-svh overflow-hidden">
@@ -47,14 +55,31 @@ export default function PlayerLobby() {
                 <p className="text-sm md:text-base">Link with spotify</p>
               </button>
             </div>
-            <div className="flex sm:w-1/2 w-full items-baseline justify-between">
+            <div className="flex sm:w-1/2 w-full items-center justify-between">
               <p className="text-center text-2xl">Players</p>
-              <img src={settingsIcon} alt="" />
+              <button>
+                <img
+                  src={settingsIcon}
+                  alt=""
+                  className="min-w-6"
+                  onClick={() => setShowModal(true)}
+                />
+              </button>
             </div>
             <PlayerList players={players} />
           </div>
+
+          <SettingsModal
+            showModal={showModal}
+            onClose={() => setShowModal(false)}
+          />
+
+          {allPlayersReady && (
+            <button className="start-btn fixed bottom-0 w-full text-black py-3 text-center">
+              Start Game
+            </button>
+          )}
         </div>
-        
       </div>
     </div>
   );
