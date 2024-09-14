@@ -3,6 +3,7 @@ import logo from "../images/landing-logo.svg";
 import HomeBtn from "../components/HomeBtn";
 import DevBtn from "../components/DevBtn";
 import AlbumsDisplay from "../components/AlbumsDisplay";
+import { Link } from "react-router-dom";
 
 export default function Landing() {
   return (
@@ -17,11 +18,13 @@ export default function Landing() {
               type="text"
               placeholder="Enter Code"
             />
-            <HomeBtn style="join" text="Join game" />
+            <Link to="/lobby" className="w-full text-center">
+              <HomeBtn style="join-btn" text="Join game" />
+            </Link>
           </div>
         </div>
         <div className="landing-bottom flex flex-col items-center gap-1 pt-20">
-          <HomeBtn style="host" text="Host game" />
+          <HomeBtn style="host-btn" text="Host game" />
           <div className="dev-links flex gap-5 m-5">
             <DevBtn dev="wilson" />
             <DevBtn dev="kenny" />

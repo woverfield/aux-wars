@@ -16,16 +16,18 @@
 
 .join-code {
   background-color: transparent;
-  border-bottom: 1px solid #6A6A6A;
+  border-bottom: 1px solid #6a6a6a;
   width: 231px;
+
   @media screen and (min-width: 768px) {
     width: 100%;
   }
 }
 
 .join-btn {
-  background-color: #68D570;
+  background-color: #68d570;
   width: 231px;
+
   @media screen and (min-width: 768px) {
     width: 100%;
   }
@@ -33,33 +35,130 @@
 
 .join-code {
   &::placeholder {
-    color: #B9B9B9;
+    color: #b9b9b9;
   }
+
   &:focus {
     outline: none;
   }
 }
 
 .host-btn {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   width: 231px;
+
   @media screen and (min-width: 768px) {
     width: 377px;
   }
 }
 
 .dev-btn {
-  color: #B9B9B9;
+  color: #b9b9b9;
   background-color: transparent;
-  border: 1px solid #B9B9B9;
+  border: 1px solid #b9b9b9;
   width: 150px;
   height: 30px;
 }
 
+.leave-btn {
+  background-color: #68d570;
+}
+
 .album {
   width: 300px;
-  @media screen and (max-width: 768px){
+
+  @media screen and (max-width: 768px) {
     width: 250px;
   }
 }
 
+.lobby-info {
+  input {
+    background-color: #414141;
+    opacity: 75%;
+    padding: 1rem;
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.lobby-code-count {
+  display: flex;
+  width: 100%;
+}
+
+.lobby-container {
+  background-color: #242424;
+  padding: 1rem;
+  width: 100%;
+  opacity: 85%;
+}
+
+.spotify-btn {
+  background-color: white;
+  color: black;
+  width: fit-content;
+  align-self: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.lobby-players {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  font-weight: normal;
+}
+
+.lobby-player {
+  background-color: #242424;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem;
+  opacity: 85%;
+}
+
+.linked {
+  color: #68d570;
+  font-weight: bold;
+}
+
+.not-linked {
+  color: #ff2929;
+  font-weight: bold;
+}
+
+.start-btn {
+  background-color: #68d570;
+}
+
+.settings-modal {
+  position: fixed;
+  background-color: #121212;
+  width: 100svw;
+  height: 100svh;
+  opacity: 70%;
+  top: 0;
+  color: white;
+}
+
+.round-settings {
+  input {
+    background-color: #414141;
+    opacity: 75%;
+    padding: 1rem;
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.round-container {
+  background-color: #242424;
+  padding: 2rem;
+  opacity: 85%;
+}
