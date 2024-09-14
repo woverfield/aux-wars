@@ -21,26 +21,46 @@ export default function SettingsModal({ showModal, onClose }) {
   if (!showModal) return null;
 
   return (
-    <div className="settings-modal">
-      <div className="settings">
-        <div className="round-settings">
-          <p className="text-xl">Nickname: </p>
-          <div className="flex flex-col gap-5 sm:w-1/2 w-full">
-            <input type="text" className="w-full rounded-md" />
-            <div className="lobby-code-count flex gap-5">
-              <div className="lobby-container rounded-md lobby-code flex flex-col gap-2">
-                <p className="text-xs font-normal">Code</p>
-                <p className="text-2xl ">342324</p>
-              </div>
-              <div className="lobby-container rounded-md lobby-count flex flex-col gap-2">
-                <p className="text-xs font-normal">Players</p>
-                <p className="text-2xl">4/8</p>
+    <>
+      <div className="settings-modal">
+        <div className="settings container mx-auto p-5 mt-32">
+          <div className="round-settings">
+            <p className="text-md font-semibold">Number of Rounds: </p>
+            <div className="flex flex-col gap-5 sm:w-1/2 w-full">
+              <input type="text" className="w-full rounded-md" />
+              <p className="text-md font-semibold">Round Length: </p>
+              <div className="round-lengths grid grid-cols-2 gap-5 text-center font-normal text-xl">
+                <button>
+                  <div className="round-container rounded-md">
+                    <p className="">15 sec</p>
+                  </div>
+                </button>
+                <button>
+                  <div className="round-container rounded-md">
+                    <p className="">30 sec</p>
+                  </div>
+                </button>
+                <button>
+                  <div className="round-container rounded-md">
+                    <p className="">1 min</p>
+                  </div>
+                </button>
+                <button>
+                  <div className="round-container rounded-md">
+                    <p className="">2 min</p>
+                  </div>
+                </button>
               </div>
             </div>
           </div>
         </div>
-        <div className="misc-settings"></div>
       </div>
-    </div>
+      <button
+        className="fixed bottom-0 w-full font-normal text-white py-10"
+        onClick={onClose}
+      >
+        <p className="text-center">close</p>
+      </button>
+    </>
   );
 }

@@ -87,6 +87,7 @@
   display: flex;
   width: 100%;
 }
+
 .lobby-container {
   background-color: #242424;
   padding: 1rem;
@@ -143,7 +144,6 @@
   opacity: 70%;
   top: 0;
   color: white;
-  filter: blur(10px);
   input {
     background-color: #414141;
     opacity: 75%;
@@ -152,4 +152,10 @@
       outline: none;
     }
   }
+}
+
+.round-container {
+  background-color: #242424;
+  padding: 2rem;
+  opacity: 85%;
 }
