@@ -6,13 +6,13 @@ import settingsIcon from "../images/settings-btn.svg";
 import PlayerList from "../components/PlayerList";
 import { useState } from "react";
 import SettingsModal from "../components/SettingsModal";
+import { Link } from "react-router-dom";
 
 export default function PlayerLobby() {
   const [players, setPlayers] = useState([
     { name: "Kenny Morales", isLinked: true },
     { name: "Wilson Overfield", isLinked: true },
     { name: "Lance Labumsher", isLinked: false },
-    { name: "Bob Smith", isLinked: true },
     { name: "Bob Smith", isLinked: true },
     { name: "Bob Smith", isLinked: true },
     { name: "Bob Smith", isLinked: true },
@@ -36,14 +36,16 @@ export default function PlayerLobby() {
               <img src={logo} alt="" className="min-w-10" />
               <p className="text-2xl text-white">Lobby</p>
             </div>
-            <button className="leave-btn rounded-full py-2 px-4">
-              <p className="text-xs md:text-sm">Leave Lobby</p>
-            </button>
+            <Link to="/">
+              <button className="leave-btn rounded-full py-2 px-4">
+                <p className="text-xs md:text-sm">Leave Lobby</p>
+              </button>
+            </Link>
           </div>
-          <div className="lobby-body">
+          <div className="lobby-body ">
             <div className="lobby-info flex flex-col sm:items-start container mx-auto px-5 py-4 text-white gap-10">
               <p className="text-xl">Nickname: </p>
-              <div className="flex flex-col gap-5 sm:w-1/2 w-full">
+              <div className="flex flex-col gap-5 w-full">
                 <input type="text" className="w-full rounded-md" />
                 <div className="lobby-code-count flex gap-5">
                   <div className="lobby-container rounded-md lobby-code flex flex-col gap-2">
@@ -52,7 +54,7 @@ export default function PlayerLobby() {
                   </div>
                   <div className="lobby-container rounded-md lobby-count flex flex-col gap-2">
                     <p className="text-xs font-normal">Players</p>
-                    <p className="text-2xl">4/8</p>
+                    <p className="text-2xl">{players.length}/8</p>
                   </div>
                 </div>
                 <button className="spotify-btn rounded-full py-2 px-8">
@@ -60,7 +62,7 @@ export default function PlayerLobby() {
                   <p className="text-sm md:text-base">Link with spotify</p>
                 </button>
               </div>
-              <div className="flex sm:w-1/2 w-full items-center justify-between">
+              <div className="flex w-full items-center justify-between">
                 <p className="text-center text-2xl">Players</p>
                 <button>
                   <img
@@ -73,7 +75,6 @@ export default function PlayerLobby() {
               </div>
               <PlayerList players={players} />
             </div>
-
             {allPlayersReady && (
               <button className="start-btn fixed bottom-0 w-full text-black py-3 text-center">
                 Start Game

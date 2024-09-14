@@ -26,7 +26,7 @@ export default function SettingsModal({ showModal, onClose }) {
         <div className="settings container mx-auto p-5 mt-32">
           <div className="round-settings">
             <p className="text-md font-semibold">Number of Rounds: </p>
-            <div className="flex flex-col gap-5 sm:w-1/2 w-full">
+            <div className="flex flex-col gap-5 w-full">
               <input type="text" className="w-full rounded-md" />
               <p className="text-md font-semibold">Round Length: </p>
               <div className="round-lengths grid grid-cols-2 gap-5 text-center font-normal text-xl">

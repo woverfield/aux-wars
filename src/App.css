@@ -144,6 +144,9 @@
   opacity: 70%;
   top: 0;
   color: white;
+}
+
+.round-settings {
   input {
     background-color: #414141;
     opacity: 75%;
