@@ -1,46 +1,41 @@
 import React from "react";
-import AlbumsDisplay from "../components/AlbumsDisplay";
 import logo from "../images/aux-wars-logo.svg";
 import spotifyIcon from "../images/spotify-icon.svg";
 import settingsIcon from "../images/settings-btn.svg";
 import PlayerList from "../components/PlayerList";
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import SettingsModal from "../components/SettingsModal";
-import { Link } from "react-router-dom";
 
-export default function PlayerLobby() {
-  const [players, setPlayers] = useState([
-    { name: "Kenny Morales", isLinked: true },
-    { name: "Wilson Overfield", isLinked: true },
-    { name: "Lance Labumsher", isLinked: false },
-    { name: "Bob Smith", isLinked: true },
-    { name: "Bob Smith", isLinked: true },
-    { name: "Bob Smith", isLinked: true },
-  ]);
-
+export default function PlayerLobby({ socket }) {
+  const { gameCode } = useParams();
+  const [players, setPlayers] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
-  const allPlayersReady = players.every((player) => player.isLinked);
+  const allPlayersReady =
+    players.every((player) => player.isLinked) && players.length > 1;
+
+  const handleLeaveGame = () => {
+    socket.emit("leave-game", { code: gameCode });
+    navigate("/");
+  };
 
   return (
     <>
-      <div
-        className={`relative h-svh overflow-hidden ${
-          showModal ? "blur-md" : ""
-        }`}
-      >
-        <AlbumsDisplay />
+      <div className={`${showModal ? "blur-md" : ""}`}>
         <div className="player-lobby h-svh flex flex-col relative z-20 font-semibold">
           <div className="lobby-header flex justify-between items-center mt-10 container mx-auto p-5">
             <div className="lobby-header-left flex items-center gap-2">
               <img src={logo} alt="" className="min-w-10" />
               <p className="text-2xl text-white">Lobby</p>
             </div>
-            <Link to="/">
-              <button className="leave-btn rounded-full py-2 px-4">
-                <p className="text-xs md:text-sm">Leave Lobby</p>
-              </button>
-            </Link>
+            <button
+              className="leave-btn rounded-full py-2 px-4"
+              onClick={handleLeaveGame}
+            >
+              <p className="text-xs md:text-sm">Leave Lobby</p>
+            </button>
           </div>
           <div className="lobby-body ">
             <div className="lobby-info flex flex-col sm:items-start container mx-auto px-5 py-4 text-white gap-10">
@@ -50,7 +45,7 @@ export default function PlayerLobby() {
                 <div className="lobby-code-count flex gap-5">
                   <div className="lobby-container rounded-md lobby-code flex flex-col gap-2">
                     <p className="text-xs font-normal">Code</p>
-                    <p className="text-2xl ">342324</p>
+                    <p className="text-2xl ">{gameCode}</p>
                   </div>
                   <div className="lobby-container rounded-md lobby-count flex flex-col gap-2">
                     <p className="text-xs font-normal">Players</p>

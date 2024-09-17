@@ -1,14 +1,39 @@
-import React from "react";
+import React, { useState } from "react";
 import logo from "../images/landing-logo.svg";
 import HomeBtn from "../components/HomeBtn";
 import DevBtn from "../components/DevBtn";
-import AlbumsDisplay from "../components/AlbumsDisplay";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-export default function Landing() {
+export default function Landing({ socket }) {
+  const [gameCode, setGameCode] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
+
+  const handleInputChange = (event) => {
+    setGameCode(event.target.value);
+  };
+
+  const handleJoinGame = () => {
+    socket.emit("check-game-code", { code: gameCode }, (isValid) => {
+      console.log(gameCode);
+      if (isValid) {
+        socket.emit("join-game", { code: gameCode });
+        navigate(`/lobby/${gameCode}`);
+      } else {
+        setErrorMessage("Invalid game code.");
+      }
+    });
+  };
+
+  const handleHostGame = () => {
+    socket.emit("host-game", (generatedGameCode) => {
+      console.log("New game hosted with code: ", generatedGameCode);
+      navigate(`/lobby/${generatedGameCode}`);
+    });
+  };
+
   return (
-    <div className="relative h-svh overflow-hidden">
-      <AlbumsDisplay />
+    <div>
       <div className="landing h-svh flex flex-col justify-around relative z-20">
         <div className="landing-top flex flex-col items-center my-10">
           <img className="landing-logo p-12" src={logo} alt="" />
@@ -17,14 +42,19 @@ export default function Landing() {
               className="join-code text-center text-2xl py-3 text-white"
               type="text"
               placeholder="Enter Code"
+              value={gameCode}
+              onChange={handleInputChange}
             />
-            <Link to="/lobby" className="w-full text-center">
+            {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+            <button className="w-full text-center" onClick={handleJoinGame}>
               <HomeBtn style="join-btn" text="Join game" />
-            </Link>
+            </button>
           </div>
         </div>
         <div className="landing-bottom flex flex-col items-center gap-1 pt-20">
-          <HomeBtn style="host-btn" text="Host game" />
+          <button onClick={handleHostGame}>
+            <HomeBtn style="host-btn" text="Host game" />
+          </button>
           <div className="dev-links flex gap-5 m-5">
             <DevBtn dev="wilson" />
             <DevBtn dev="kenny" />
