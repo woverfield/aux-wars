@@ -6,9 +6,7 @@ export default function MainDisplay() {
   return (
     <div className="relative h-svh overflow-hidden">
       <AlbumsDisplay />
-      <div className="display-container">
-        <Outlet />
-      </div>
+      <Outlet />
     </div>
   );
 }

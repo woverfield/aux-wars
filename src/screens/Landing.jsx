@@ -33,7 +33,7 @@ export default function Landing({ socket }) {
   };
 
   return (
-    <div>
+    <>
       <div className="landing h-svh flex flex-col justify-around relative z-20">
         <div className="landing-top flex flex-col items-center my-10">
           <img className="landing-logo p-12" src={logo} alt="" />
@@ -61,6 +61,6 @@ export default function Landing({ socket }) {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

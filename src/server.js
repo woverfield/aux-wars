@@ -12,7 +12,8 @@ const io = new Server(server, {
   },
 });
 
-const validGameCodes = ["ABC123", "DEF456", "GHI789"]; 
+const validGameCodes = [];
+const gameRooms = {};
 
 const validateGameCode = (code) => {
   return validGameCodes.includes(code);
@@ -28,13 +29,16 @@ const generateGameCode = () => {
 };
 
 io.on("connection", (socket) => {
-  console.log(`a user connected! ${socket.id}`);
+  console.log(`A user connected! ${socket.id}`);
 
   socket.on("host-game", (callback) => {
     const gameCode = generateGameCode();
     validGameCodes.push(gameCode);
+    socket.rooms.add(gameCode);
+    gameRooms[gameCode] = [];
     console.log(`New game hosted by ${socket.id} with code: ${gameCode}`);
     callback(gameCode);
+    console.log(socket.rooms);
   });
 
   socket.on("check-game-code", (data, callback) => {
@@ -43,10 +47,15 @@ io.on("connection", (socket) => {
   });
 
   socket.on("join-game", (data) => {
+    gameRooms[data.code].push({ id: socket.id });
     console.log(`${socket.id} joined the game with code: ${data.code}`);
+    io.to(data.code).emit("update-players", gameRooms[data.code])
+    socket.join(data.code);
+    console.log(socket.rooms);
   });
 
-  socket.on("leave-game", () => {
+  socket.on("leave-game", (data) => {
+    socket.leave(data.code);
     console.log(`${socket.id} left the game`);
   });
 });
