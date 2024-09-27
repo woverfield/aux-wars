@@ -21,9 +21,9 @@ export default function PlayerLobby({ socket }) {
     navigate("/");
   };
 
-  const handleUpdatePlayers = (playerList) => {
-    console.log("Received player list update:", playerList);
-    setPlayers(playerList);
+  const handleUpdatePlayers = (data) => {
+    console.log(data);
+    setPlayers(data);
   };
 
   socket.on("update-players", handleUpdatePlayers);

@@ -13,7 +13,7 @@ const io = new Server(server, {
 });
 
 const validGameCodes = [];
-const gameRooms = {};
+const gameRooms = new Map();
 
 const validateGameCode = (code) => {
   return validGameCodes.includes(code);
@@ -34,11 +34,17 @@ io.on("connection", (socket) => {
   socket.on("host-game", (callback) => {
     const gameCode = generateGameCode();
     validGameCodes.push(gameCode);
+
     socket.rooms.add(gameCode);
-    gameRooms[gameCode] = [];
+    gameRooms.set(gameCode, []);
+
+    socket.join(gameCode);
+    gameRooms.get(gameCode).push({ id: socket.id });
+
+    console.log(gameRooms);
+    io.to(gameCode).emit("update-players", gameRooms.get(gameCode));
     console.log(`New game hosted by ${socket.id} with code: ${gameCode}`);
     callback(gameCode);
-    console.log(socket.rooms);
   });
 
   socket.on("check-game-code", (data, callback) => {
@@ -47,18 +53,30 @@ io.on("connection", (socket) => {
   });
 
   socket.on("join-game", (data) => {
-    gameRooms[data.code].push({ id: socket.id });
-    console.log(`${socket.id} joined the game with code: ${data.code}`);
-    console.log(gameRooms[data.code]);
-    console.log(gameRooms);
-    io.to(data.code).emit("update-players", gameRooms[data.code])
-    socket.join(data.code);
-    console.log(socket.rooms);
+    if (gameRooms.has(data.code)) {
+      gameRooms.get(data.code).push({ id: socket.id });
+      console.log(`${socket.id} joined the game with code: ${data.code}`);
+      socket.join(data.code);
+      io.to(data.code).emit("update-players", gameRooms.get(data.code));
+      console.log(gameRooms);
+    } else {
+      console.log(`Game with code ${data.code} does not exist.`);
+    }
   });
 
   socket.on("leave-game", (data) => {
     socket.leave(data.code);
-    console.log(`${socket.id} left the game`);
+    if (gameRooms.has(data.code)) {
+      const players = gameRooms.get(data.code);
+      const updatedPlayers = players.filter(
+        (player) => player.id !== socket.id
+      );
+      gameRooms.set(data.code, updatedPlayers);
+
+      socket.to(data.code).emit("update-players", updatedPlayers);
+      console.log(gameRooms);
+      console.log(`${socket.id} left the game`);
+    }
   });
 });
 
