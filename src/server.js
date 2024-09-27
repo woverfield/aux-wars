@@ -49,6 +49,8 @@ io.on("connection", (socket) => {
   socket.on("join-game", (data) => {
     gameRooms[data.code].push({ id: socket.id });
     console.log(`${socket.id} joined the game with code: ${data.code}`);
+    console.log(gameRooms[data.code]);
+    console.log(gameRooms);
     io.to(data.code).emit("update-players", gameRooms[data.code])
     socket.join(data.code);
     console.log(socket.rooms);
