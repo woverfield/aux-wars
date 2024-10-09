@@ -11,6 +11,7 @@ export default function PlayerLobby({ socket }) {
   const { gameCode } = useParams();
   const [players, setPlayers] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [name, setName] = useState("");
   const navigate = useNavigate();
 
   const allPlayersReady =
@@ -55,6 +56,14 @@ export default function PlayerLobby({ socket }) {
                 type="text"
                 className="w-full rounded-md"
                 placeholder="Enter Name Here"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  socket.emit("update-player-name", {
+                    gameCode,
+                    name: e.target.value,
+                  });
+                }}
               />
               <div className="lobby-code-count flex gap-5">
                 <div className="lobby-container rounded-md lobby-code flex flex-col gap-2">

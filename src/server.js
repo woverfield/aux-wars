@@ -64,6 +64,19 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("update-player-name", (data) => {
+    const { gameCode, name } = data;
+    if (gameRooms.has(gameCode)) {
+      const players = gameRooms.get(gameCode);
+      const updatedPlayers = players.map((player) =>
+        player.id === socket.id ? { ...player, name } : player
+      );
+      gameRooms.set(gameCode, updatedPlayers);
+
+      io.to(gameCode).emit("update-players", updatedPlayers);
+    }
+  });
+
   socket.on("leave-game", (data) => {
     socket.leave(data.code);
     if (gameRooms.has(data.code)) {
