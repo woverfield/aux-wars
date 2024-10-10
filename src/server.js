@@ -41,7 +41,6 @@ io.on("connection", (socket) => {
     socket.join(gameCode);
     gameRooms.get(gameCode).push({ id: socket.id });
 
-    console.log(gameRooms);
     io.to(gameCode).emit("update-players", gameRooms.get(gameCode));
     console.log(`New game hosted by ${socket.id} with code: ${gameCode}`);
     callback(gameCode);
@@ -58,7 +57,6 @@ io.on("connection", (socket) => {
       console.log(`${socket.id} joined the game with code: ${data.code}`);
       socket.join(data.code);
       io.to(data.code).emit("update-players", gameRooms.get(data.code));
-      console.log(gameRooms);
     } else {
       console.log(`Game with code ${data.code} does not exist.`);
     }
@@ -72,7 +70,6 @@ io.on("connection", (socket) => {
         player.id === socket.id ? { ...player, name } : player
       );
       gameRooms.set(gameCode, updatedPlayers);
-
       io.to(gameCode).emit("update-players", updatedPlayers);
     }
   });
@@ -87,7 +84,6 @@ io.on("connection", (socket) => {
       gameRooms.set(data.code, updatedPlayers);
 
       socket.to(data.code).emit("update-players", updatedPlayers);
-      console.log(gameRooms);
       console.log(`${socket.id} left the game`);
     }
   });

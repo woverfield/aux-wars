@@ -23,11 +23,14 @@ export default function PlayerLobby({ socket }) {
   };
 
   const handleUpdatePlayers = (data) => {
-    console.log(data);
     setPlayers(data);
   };
 
   socket.on("update-players", handleUpdatePlayers);
+
+  useEffect(() => {
+    socket.emit("update-player-name", { gameCode, name });
+  }, []);
 
   return (
     <>
