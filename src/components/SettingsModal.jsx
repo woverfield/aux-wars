@@ -22,7 +22,7 @@ export default function SettingsModal({ showModal, onClose }) {
 
   return (
     <>
-      <div className="settings-modal">
+      <div className="settings-modal z-10">
         <div className="settings container mx-auto p-5 mt-32">
           <div className="round-settings">
             <p className="text-md font-semibold">Number of Rounds: </p>
