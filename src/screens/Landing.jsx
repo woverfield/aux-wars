@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import logo from "../images/landing-logo.svg";
 import HomeBtn from "../components/HomeBtn";
 import DevBtn from "../components/DevBtn";
 import { useNavigate } from "react-router-dom";
+import AnimatedLogo from "../components/AnimatedLogo";
 
 export default function Landing({ socket }) {
   const [gameCode, setGameCode] = useState("");
@@ -14,13 +14,11 @@ export default function Landing({ socket }) {
   };
 
   const handleJoinGame = () => {
-    socket.emit("check-game-code", { code: gameCode }, (isValid) => {
-      console.log(gameCode);
-      if (isValid) {
-        socket.emit("join-game", { code: gameCode });
+    socket.emit("join-game", { code: gameCode }, (response) => {
+      if (response.success) {
         navigate(`/lobby/${gameCode}`);
       } else {
-        setErrorMessage("Invalid game code.");
+        console.error("Invalid game code");
       }
     });
   };
@@ -36,7 +34,7 @@ export default function Landing({ socket }) {
     <>
       <div className="landing h-svh flex flex-col justify-around relative z-20">
         <div className="landing-top flex flex-col items-center my-10">
-          <img className="landing-logo p-12" src={logo} alt="" />
+          <AnimatedLogo />
           <div className="landing-join flex flex-col items-center gap-8">
             <input
               className="join-code text-center text-2xl py-3 text-white"

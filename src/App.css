@@ -122,12 +122,12 @@
   opacity: 85%;
 }
 
-.linked {
+.ready {
   color: #68d570;
   font-weight: bold;
 }
 
-.not-linked {
+.not-ready {
   color: #ff2929;
   font-weight: bold;
 }

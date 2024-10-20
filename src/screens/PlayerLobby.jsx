@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import logo from "../images/aux-wars-logo.svg";
 import spotifyIcon from "../images/spotify-icon.svg";
 import settingsIcon from "../images/settings-btn.svg";
 import PlayerList from "../components/PlayerList";
-import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import SettingsModal from "../components/SettingsModal";
+import { motion } from "framer-motion";
 
 export default function PlayerLobby({ socket }) {
   const { gameCode } = useParams();
@@ -14,23 +14,31 @@ export default function PlayerLobby({ socket }) {
   const [name, setName] = useState("");
   const navigate = useNavigate();
 
-  const allPlayersReady =
-    players.every((player) => player.isLinked) && players.length > 1;
+  const allPlayersReady = players.every((player) => player.ready);
 
   const handleLeaveGame = () => {
     socket.emit("leave-game", { code: gameCode });
     navigate("/");
   };
 
-  const handleUpdatePlayers = (data) => {
-    setPlayers(data);
-  };
+  socket.on("connection", () => {
+    console.log(`User ${socket.id} connected`);
+    socket.emit("join-game", { code: gameCode, name: name }, (response) => {
+      if (response.success) {
+        navigate(`/lobby/${gameCode}`);
+      } else {
+        console.error("Invalid game code");
+      }
+    });
+  });
 
-  socket.on("update-players", handleUpdatePlayers);
+  socket.on("update-players", (data) => {
+    setPlayers(data);
+  });
 
   useEffect(() => {
     socket.emit("update-player-name", { gameCode, name });
-  }, []);
+  }, [name]);
 
   return (
     <>
@@ -44,12 +52,19 @@ export default function PlayerLobby({ socket }) {
             <img src={logo} alt="" className="min-w-10" />
             <p className="text-2xl text-white">Lobby</p>
           </div>
-          <button
-            className="leave-btn rounded-full py-2 px-4"
-            onClick={handleLeaveGame}
+          <motion.div
+            initial={{ scale: 1 }}
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+            className=""
           >
-            <p className="text-xs md:text-sm">Leave Lobby</p>
-          </button>
+            <button
+              className="leave-btn rounded-full py-2 px-4"
+              onClick={handleLeaveGame}
+            >
+              <p className="text-xs md:text-sm">Leave Lobby</p>
+            </button>
+          </motion.div>
         </div>
         <div className="lobby-body ">
           <div className="lobby-info flex flex-col sm:items-start container mx-auto px-5 py-4 text-white gap-10">
@@ -58,13 +73,14 @@ export default function PlayerLobby({ socket }) {
               <input
                 type="text"
                 className="w-full rounded-md"
-                placeholder="Enter Name Here"
+                placeholder={"Enter your nickname"}
                 value={name}
                 onChange={(e) => {
-                  setName(e.target.value);
+                  const newName = e.target.value;
+                  setName(newName);
                   socket.emit("update-player-name", {
                     gameCode,
-                    name: e.target.value,
+                    name: newName,
                   });
                 }}
               />
@@ -78,10 +94,21 @@ export default function PlayerLobby({ socket }) {
                   <p className="text-2xl">{players.length}/8</p>
                 </div>
               </div>
-              <button className="spotify-btn rounded-full py-2 px-8">
-                <img src={spotifyIcon} alt="" className="min-w-8" />
-                <p className="text-sm md:text-base">Link with spotify</p>
-              </button>
+              <div className="flex justify-center">
+                <motion.div
+                  initial={{ scale: 1 }}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  className=""
+                >
+                  <button className="spotify-btn rounded-full py-2 px-8">
+                    <img src={spotifyIcon} alt="" className="min-w-8" />
+                    <p className="text-sm md:text-base">
+                      Powered By SpotifyAPI
+                    </p>
+                  </button>
+                </motion.div>
+              </div>
             </div>
             <div className="flex w-full items-center justify-between">
               <p className="text-center text-2xl">Players</p>
