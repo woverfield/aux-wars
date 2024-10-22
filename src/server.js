@@ -12,12 +12,8 @@ const io = new Server(server, {
   },
 });
 
-const validGameCodes = [];
 const gameRooms = new Map();
-
-const validateGameCode = (code) => {
-  return validGameCodes.includes(code);
-};
+const validGameCodes = [];
 
 const generateGameCode = () => {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -31,6 +27,8 @@ const generateGameCode = () => {
 io.on("connection", (socket) => {
   console.log(`A user connected! ${socket.id}`);
 
+  socket.emit("connection");
+
   socket.on("host-game", (callback) => {
     const gameCode = generateGameCode();
     validGameCodes.push(gameCode);
@@ -39,35 +37,37 @@ io.on("connection", (socket) => {
     gameRooms.set(gameCode, []);
 
     socket.join(gameCode);
-    gameRooms.get(gameCode).push({ id: socket.id });
+    gameRooms.get(gameCode).push({ id: socket.id, name: "" });
 
     io.to(gameCode).emit("update-players", gameRooms.get(gameCode));
     console.log(`New game hosted by ${socket.id} with code: ${gameCode}`);
     callback(gameCode);
   });
 
-  socket.on("check-game-code", (data, callback) => {
-    const isValid = validateGameCode(data.code);
-    callback(isValid);
-  });
-
-  socket.on("join-game", (data) => {
-    if (gameRooms.has(data.code)) {
-      gameRooms.get(data.code).push({ id: socket.id });
-      console.log(`${socket.id} joined the game with code: ${data.code}`);
-      socket.join(data.code);
-      io.to(data.code).emit("update-players", gameRooms.get(data.code));
-    } else {
-      console.log(`Game with code ${data.code} does not exist.`);
+  socket.on("join-game", (data, callback) => {
+    const { code, name } = data;
+    if (!gameRooms.has(code)) {
+      return callback({ success: false });
     }
+
+    const players = gameRooms.get(code);
+    if (players.some((player) => player.id === socket.id)) {
+      return callback({ success: false });
+    }
+    players.push({ id: socket.id, name });
+    gameRooms.set(code, players);
+
+    socket.join(code);
+    io.to(code).emit("update-players", players);
+    callback({ success: true });
   });
 
   socket.on("update-player-name", (data) => {
-    const { gameCode, name } = data;
+    const { gameCode, name, isReady } = data;
     if (gameRooms.has(gameCode)) {
       const players = gameRooms.get(gameCode);
       const updatedPlayers = players.map((player) =>
-        player.id === socket.id ? { ...player, name } : player
+        player.id === socket.id ? { ...player, name, isReady } : player
       );
       gameRooms.set(gameCode, updatedPlayers);
       io.to(gameCode).emit("update-players", updatedPlayers);
@@ -86,6 +86,24 @@ io.on("connection", (socket) => {
       socket.to(data.code).emit("update-players", updatedPlayers);
       console.log(`${socket.id} left the game`);
     }
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`User ${socket.id} disconnected`);
+    validGameCodes.forEach((code) => {
+      if (gameRooms.has(code)) {
+        const players = gameRooms.get(code);
+        const updatedPlayers = players.filter(
+          (player) => player.id !== socket.id
+        );
+
+        if (updatedPlayers.length !== players.length) {
+          gameRooms.set(code, updatedPlayers);
+          socket.to(code).emit("update-players", updatedPlayers);
+          console.log(`${socket.id} removed from game ${code}`);
+        }
+      }
+    });
   });
 });
 
