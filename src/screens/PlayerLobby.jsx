@@ -12,9 +12,11 @@ export default function PlayerLobby({ socket }) {
   const [players, setPlayers] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [name, setName] = useState("");
+  const [isReady, setIsReady] = useState(false);
+  const [animateInput, setAnimateInput] = useState(false);
   const navigate = useNavigate();
 
-  const allPlayersReady = players.every((player) => player.ready);
+  const allPlayersReady = players.every((player) => player.isReady);
 
   const handleLeaveGame = () => {
     socket.emit("leave-game", { code: gameCode });
@@ -37,8 +39,28 @@ export default function PlayerLobby({ socket }) {
   });
 
   useEffect(() => {
-    socket.emit("update-player-name", { gameCode, name });
-  }, [name]);
+    socket.emit("update-player-name", { gameCode, name, isReady });
+  }, [name, isReady]);
+
+  const pulseAnimation = {
+    scale: [1, 1.05, 1],
+    transition: {
+      duration: 1,
+      repeat: 3,
+      ease: "easeInOut",
+    },
+  };
+
+  const handleReady = () => {
+    if (name.length > 0) {
+      setIsReady(!isReady);
+    } else {
+      setAnimateInput(true);
+      setTimeout(() => {
+        setAnimateInput(false);
+      }, 3000);
+    }
+  };
 
   return (
     <>
@@ -70,7 +92,7 @@ export default function PlayerLobby({ socket }) {
           <div className="lobby-info flex flex-col sm:items-start container mx-auto px-5 py-4 text-white gap-10">
             <p className="text-xl">Nickname: </p>
             <div className="flex flex-col gap-5 w-full">
-              <input
+              <motion.input
                 type="text"
                 className="w-full rounded-md"
                 placeholder={"Enter your nickname"}
@@ -83,6 +105,7 @@ export default function PlayerLobby({ socket }) {
                     name: newName,
                   });
                 }}
+                animate={animateInput ? pulseAnimation : {}}
               />
               <div className="lobby-code-count flex gap-5">
                 <div className="lobby-container rounded-md lobby-code flex flex-col gap-2">
@@ -94,7 +117,26 @@ export default function PlayerLobby({ socket }) {
                   <p className="text-2xl">{players.length}/8</p>
                 </div>
               </div>
-              <div className="flex justify-center">
+              <div className="flex flex-col items-center gap-5">
+                <motion.div
+                  initial={{ scale: 1 }}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  className=""
+                >
+                  <button
+                    className={
+                      isReady
+                        ? "join-btn rounded-full py-2 px-8"
+                        : "spotify-btn rounded-full py-2 px-8"
+                    }
+                    onClick={handleReady}
+                  >
+                    <p className="text-sm md:text-base">
+                      {isReady ? "Ready" : "Not Ready"}
+                    </p>
+                  </button>
+                </motion.div>
                 <motion.div
                   initial={{ scale: 1 }}
                   whileHover={{ scale: 1.05 }}

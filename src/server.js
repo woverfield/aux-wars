@@ -46,7 +46,6 @@ io.on("connection", (socket) => {
 
   socket.on("join-game", (data, callback) => {
     const { code, name } = data;
-    console.log(data);
     if (!gameRooms.has(code)) {
       return callback({ success: false });
     }
@@ -64,11 +63,11 @@ io.on("connection", (socket) => {
   });
 
   socket.on("update-player-name", (data) => {
-    const { gameCode, name } = data;
+    const { gameCode, name, isReady } = data;
     if (gameRooms.has(gameCode)) {
       const players = gameRooms.get(gameCode);
       const updatedPlayers = players.map((player) =>
-        player.id === socket.id ? { ...player, name } : player
+        player.id === socket.id ? { ...player, name, isReady } : player
       );
       gameRooms.set(gameCode, updatedPlayers);
       io.to(gameCode).emit("update-players", updatedPlayers);
