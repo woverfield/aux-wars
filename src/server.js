@@ -37,7 +37,7 @@ io.on("connection", (socket) => {
     gameRooms.set(gameCode, []);
 
     socket.join(gameCode);
-    gameRooms.get(gameCode).push({ id: socket.id, name: "" });
+    gameRooms.get(gameCode).push({ id: socket.id, name: "", isHost: true });
 
     io.to(gameCode).emit("update-players", gameRooms.get(gameCode));
     console.log(`New game hosted by ${socket.id} with code: ${gameCode}`);
@@ -54,7 +54,7 @@ io.on("connection", (socket) => {
     if (players.some((player) => player.id === socket.id)) {
       return callback({ success: false });
     }
-    players.push({ id: socket.id, name });
+    players.push({ id: socket.id, name, isHost: false });
     gameRooms.set(code, players);
 
     socket.join(code);
@@ -78,12 +78,15 @@ io.on("connection", (socket) => {
     socket.leave(data.code);
     if (gameRooms.has(data.code)) {
       const players = gameRooms.get(data.code);
-      const updatedPlayers = players.filter(
-        (player) => player.id !== socket.id
-      );
-      gameRooms.set(data.code, updatedPlayers);
+      const leavingPlayer = players.find(player => player.id === socket.id);
+      const updatedPlayers = players.filter(player => player.id !== socket.id);
 
-      socket.to(data.code).emit("update-players", updatedPlayers);
+      if (leavingPlayer && leavingPlayer.isHost && updatedPlayers.length > 0) {
+        updatedPlayers[0].isHost = true;
+      }
+
+      gameRooms.set(data.code, updatedPlayers);
+      io.to(data.code).emit("update-players", updatedPlayers);
       console.log(`${socket.id} left the game`);
     }
   });

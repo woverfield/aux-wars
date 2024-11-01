@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import logo from "../images/aux-wars-logo.svg";
 import spotifyIcon from "../images/spotify-icon.svg";
 import settingsIcon from "../images/settings-btn.svg";
@@ -13,6 +13,7 @@ export default function PlayerLobby({ socket }) {
   const [showModal, setShowModal] = useState(false);
   const [name, setName] = useState("");
   const [isReady, setIsReady] = useState(false);
+  const [isHost, setIsHost] = useState(false);
   const [animateInput, setAnimateInput] = useState(false);
   const navigate = useNavigate();
 
@@ -25,7 +26,7 @@ export default function PlayerLobby({ socket }) {
 
   socket.on("connection", () => {
     console.log(`User ${socket.id} connected`);
-    socket.emit("join-game", { code: gameCode, name: name }, (response) => {
+    socket.emit("join-game", { code: gameCode, name: name, isHost: false }, (response) => {
       if (response.success) {
         navigate(`/lobby/${gameCode}`);
       } else {
@@ -40,7 +41,14 @@ export default function PlayerLobby({ socket }) {
 
   useEffect(() => {
     socket.emit("update-player-name", { gameCode, name, isReady });
-  }, [name, isReady]);
+  }, [name, isReady, gameCode, socket]);
+
+  useEffect(() => {
+    const currentPlayer = players.find((player) => player.id === socket.id);
+    if (currentPlayer) {
+      setIsHost(currentPlayer.isHost);
+    }
+  }, [players, socket.id]);
 
   const pulseAnimation = {
     scale: [1, 1.05, 1],
@@ -165,7 +173,7 @@ export default function PlayerLobby({ socket }) {
             </div>
             <PlayerList players={players} />
           </div>
-          {allPlayersReady && (
+          {isHost && allPlayersReady && (
             <button className="start-btn fixed bottom-0 w-full text-black py-3 text-center">
               Start Game
             </button>
