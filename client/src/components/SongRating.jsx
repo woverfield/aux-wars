@@ -33,16 +33,24 @@ export default function SongRating({ track, prompt }) {
         let mounted = true;
         async function setupPlayer() {
             try {
+                console.log('Initializing Spotify Player...');
                 const { player, deviceId } = await initializeSpotifyPlayer();
                 if (!mounted) return;
                 playerRef.current = player;
                 setDeviceId(deviceId);
-                // Listen for playback state changes
+                console.log('Spotify Player initialized:', player, deviceId);
+                player.addListener('ready', ({ device_id }) => {
+                    console.log('Player is ready with device_id:', device_id);
+                });
+                player.addListener('not_ready', () => {
+                    console.log('Player is not ready');
+                });
                 player.addListener('player_state_changed', (state) => {
                     setIsPlaying(state && !state.paused);
+                    console.log('Player state changed:', state);
                 });
             } catch (err) {
-                // Handle error silently - could be enhanced with user notification
+                console.error('Error initializing Spotify Player:', err);
             }
         }
         setupPlayer();
@@ -61,17 +69,23 @@ export default function SongRating({ track, prompt }) {
      * Toggles play/pause state for the current track
      */
     const handlePlayPause = async () => {
-        if (!deviceId || !track.uri) return;
+        console.log('Play/Pause clicked. deviceId:', deviceId, 'track.uri:', track.uri, 'isPlaying:', isPlaying);
+        if (!deviceId || !track.uri) {
+            console.warn('Cannot play/pause: deviceId or track.uri missing');
+            return;
+        }
         try {
             if (!isPlaying) {
+                console.log('Attempting to play track:', track.uri, 'on device:', deviceId);
                 await playSpotifyTrack(track.uri, deviceId);
                 setIsPlaying(true);
             } else {
+                console.log('Attempting to pause playback on device:', deviceId);
                 await pauseSpotifyPlayback(deviceId);
                 setIsPlaying(false);
             }
         } catch (err) {
-            // Handle error silently - could be enhanced with user notification
+            console.error('Error in play/pause:', err);
         }
     };
 

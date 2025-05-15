@@ -49,7 +49,17 @@ export default function Login() {
       // 3) Proceed with the Spotify auth flow
       const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
       const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
-      const scope = "streaming user-read-email user-read-private user-read-playback-state user-modify-playback-state";
+      // Required scopes for playback and device control
+      const scope = [
+        "streaming",
+        "user-read-email",
+        "user-read-private",
+        "user-read-playback-state",
+        "user-modify-playback-state",
+        "user-library-read",
+        "user-library-modify"
+      ].join(" ");
+      console.log('Spotify auth scope:', scope);
 
       const codeVerifier = generateRandomString(128);
       localStorage.setItem("spotify_code_verifier", codeVerifier);

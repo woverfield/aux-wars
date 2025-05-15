@@ -10,7 +10,9 @@ import PlayerBox from "./PlayerBox";
  */
 export default function PlayerList({ players }) {
   return (
-    <div className="lobby-players w-full max-h-72 overflow-y-auto px-2">
+    <div
+      className="lobby-players flex flex-col w-full items-center gap-2 pb-8 overflow-y-auto flex-1 min-h-0"
+    >
       {players.map((player, index) => (
         <PlayerBox key={index} player={player} />
       ))}

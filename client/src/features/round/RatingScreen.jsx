@@ -26,6 +26,19 @@ const RatingScreen = ({
   // Get the Spotify token from localStorage
   const spotifyToken = localStorage.getItem('spotify_access_token');
 
+  // Debug: Log when RatingScreen renders and with what props
+  console.log('RatingScreen rendered', {
+    currentPrompt,
+    songToRate,
+    spotifyToken,
+    currentIndex,
+    totalSongs
+  });
+
+  // Construct a valid Spotify URI from trackId if uri is missing
+  const trackUri = songToRate?.uri || (songToRate?.trackId ? `spotify:track:${songToRate.trackId}` : null);
+  console.log('Using trackUri for SpotifyPlayer:', trackUri);
+
   /**
    * Handles clicking a rating record
    * @param {number} index - The index of the selected rating (0-4)
@@ -71,12 +84,12 @@ const RatingScreen = ({
         )}
 
         {/* Spotify Web Playback Player */}
-        {spotifyToken && songToRate.uri && (
+        {spotifyToken && trackUri && (
           <div className="mb-2 sm:mb-4 w-full max-w-xs flex justify-center">
             <SpotifyPlayer
               token={spotifyToken}
-              uris={[songToRate.uri]}
-              autoPlay={false}
+              uris={[trackUri]}
+              callback={state => console.log('SpotifyPlayer callback:', state)}
               showSaveIcon={false}
               hideAttribution={true}
               hideCoverArt={true}

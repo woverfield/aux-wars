@@ -203,7 +203,7 @@ export default function Lobby() {
   return (
     <>
       <div
-        className={`player-lobby h-svh flex flex-col w-full ${
+        className={`player-lobby h-screen flex flex-col w-full ${
           showModal ? "blur-sm" : ""
         }`}
       >
@@ -225,8 +225,8 @@ export default function Lobby() {
             </button>
           </motion.div>
         </div>
-        <div className="lobby-body">
-          <div className="lobby-info flex flex-col sm:items-start container mx-auto px-5 py-4 text-white gap-10">
+        <div className="lobby-body flex-1 flex flex-col min-h-0">
+          <div className="lobby-info flex flex-col sm:items-start container mx-auto px-5 py-4 text-white gap-10 flex-1 min-h-0">
             <p className="text-xl">Nickname:</p>
             <div className="flex flex-col gap-5 w-full">
               <motion.input
@@ -275,7 +275,9 @@ export default function Lobby() {
                 <img src={settingsIcon} alt="Settings" className="min-w-6" />
               </button>
             </div>
-            <PlayerList players={players} />
+            <div className="flex-1 w-full overflow-y-auto min-h-0">
+              <PlayerList players={players} />
+            </div>
           </div>
           {isHost && allPlayersReady && players.length > 2 && (
             <button
