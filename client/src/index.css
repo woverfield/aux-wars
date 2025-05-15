@@ -1,0 +1,261 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --default-font-family: "Plus Jakarta Sans";
+}
+
+.album-display {
+  background-color: #121212;
+}
+
+.album {
+  width: 250px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+
+  @media screen and (max-width: 768px) {
+    width: 200px;
+  }
+
+  @media screen and (max-width: 480px) {
+    width: 180px;
+  }
+}
+
+.spotify-btn {
+  background-color: #68d570;
+  width: 300px;
+
+  @media screen and (max-width: 768px) {
+    width: 75%;
+  }
+}
+
+.guest-btn {
+  background-color: white;
+  width: 300px;
+
+  @media screen and (max-width: 768px) {
+    width: 75%;
+  }
+}
+
+.green-btn {
+  background-color: #68d570;
+  color: black;
+}
+
+.game-info {
+  color: #b9b9b9;
+}
+
+.join-code {
+  background-color: transparent;
+  border-bottom: 2px solid #6a6a6a;
+  width: 231px;
+
+  @media screen and (min-width: 768px) {
+    width: 100%;
+  }
+}
+
+.lobby-info {
+  input {
+    background-color: #414141;
+    opacity: 75%;
+    padding: 1rem;
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.lobby-code-count {
+  display: flex;
+  width: 100%;
+}
+
+.lobby-container {
+  background-color: #242424;
+  padding: 1rem;
+  width: 100%;
+  opacity: 85%;
+}
+
+
+.lobby-players {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  font-weight: normal;
+}
+
+.lobby-player {
+  background-color: #242424;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem;
+  opacity: 85%;
+}
+
+.ready {
+  color: #68d570;
+  font-weight: bold;
+}
+
+.not-ready {
+  color: #ff2929;
+  font-weight: bold;
+}
+
+.settings-modal {
+  position: fixed;
+  background-color: #121212;
+  width: 100svw;
+  height: 100svh;
+  opacity: 70%;
+  top: 0;
+  color: white;
+}
+
+.round-settings {
+  input {
+    background-color: #414141;
+    opacity: 75%;
+    padding: 1rem;
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.round-container {
+  background-color: #242424;
+  padding: 2rem;
+  opacity: 85%;
+}
+
+.selected-round-container {
+  background-color: #68d570;
+  padding: 2rem;
+  opacity: 85%;
+  color: white;
+}
+
+.search-bar {
+  width: 100%;
+  max-width: 600px;
+  min-width: 356px;
+  height: 56px;
+  background-color: #242424;
+  opacity: .85;
+  padding: 1rem;
+  font-size: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.prompt-modal {
+  background-color: #121212;
+  opacity: 70%;
+  top: 0;
+  color: white;
+}
+.records {
+  width: 45px;
+  margin: 8px;
+  margin-bottom: 40px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  @media screen and (max-width: 768px) {
+    width: 40px;
+    margin: 6px;
+  }
+
+  @media screen and (max-width: 480px) {
+    width: 32px;
+    margin: 4px;
+    margin-bottom: 30px;
+  }
+}
+
+.song-title {
+  font-size: 22px;
+  margin-top: 10px;
+  color: #ffffff;
+  text-align: center;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  @media screen and (max-width: 480px) {
+    font-size: 18px;
+    max-width: 250px;
+  }
+}
+
+.artist-name {
+  font-size: 15px;
+  margin-bottom: 20px;
+  color: #ffffff;
+  text-align: center;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  @media screen and (max-width: 480px) {
+    font-size: 14px;
+    max-width: 250px;
+  }
+}
+
+.submit-button {
+  background-color: #68d570;
+  color: #000;
+  font-weight: bold;
+  width: 200px;
+  height: 45px;
+  border-radius: 40px;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+  
+  &:hover:not(:disabled) {
+    transform: scale(1.05);
+    background-color: #7de884;
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  @media screen and (max-width: 480px) {
+    width: 180px;
+    height: 40px;
+    font-size: 14px;
+  }
+}
+
+.rating-screen {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  
+  @media screen and (max-width: 480px) {
+    padding: 15px 10px;
+  }
+}
+
+.song-rate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
