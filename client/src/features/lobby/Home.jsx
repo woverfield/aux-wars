@@ -2,12 +2,15 @@ import React, { useState } from "react";
 import AnimatedLogo from "../../components/AnimatedLogo";
 import HomeBtn from "../../components/HomeBtn";
 import HowToPlayModal from "../../components/HowToPlayModal";
+import DevBtn from "../../components/DevBtn";
 import { useNavigate } from "react-router-dom";
 import { useSocket } from "../../services/SocketProvider";
+import { isTokenValid } from "../../services/spotifyApi";
 
 /**
  * Home component serves as the landing page for the game.
  * Provides options to host a new game or join an existing one.
+ * Requires Spotify login for both options.
  * 
  * @returns {JSX.Element} Rendered component
  */
@@ -20,11 +23,17 @@ export default function Home() {
 
   /**
    * Handles hosting a new game.
+   * Requires valid Spotify token.
    * Emits host-game event and navigates to lobby on success.
    * Disables hosting button while request is in progress.
    */
   const handleHostGame = () => {
     if (!socket || isHosting) return;
+    
+    if (!isTokenValid()) {
+      navigate("/login");
+      return;
+    }
     
     setIsHosting(true);
     socket.emit("host-game", (response) => {
@@ -38,6 +47,7 @@ export default function Home() {
 
   /**
    * Handles joining an existing game.
+   * Requires valid Spotify token.
    * Validates game code and emits join-game event.
    * Shows error message if join fails.
    */
@@ -46,8 +56,13 @@ export default function Home() {
       alert("Please enter a valid game code.");
       return;
     }
+
+    if (!isTokenValid()) {
+      navigate("/login");
+      return;
+    }
     
-    socket.emit("join-game", { gameCode: joinCode.trim(), name: "Guest" }, (response) => {
+    socket.emit("join-game", { gameCode: joinCode.trim() }, (response) => {
       if (response.success) {
         navigate(`/lobby/${joinCode.trim()}`);
       } else {
@@ -87,14 +102,17 @@ export default function Home() {
         />
       </div>
 
-      {/* How to Play button */}
-      <div className="text-center pb-6 text-white">
+      {/* How to Play button and dev credits */}
+      <div className="flex flex-col items-center gap-4 pb-6">
         <button 
           onClick={() => setShowHowToPlay(true)}
-          className="text-sm md:text-base hover:underline transition-colors"
+          className="text-sm md:text-base text-white hover:underline transition-colors"
         >
           How to play
         </button>
+        <div className="dev-links">
+          <DevBtn />
+        </div>
       </div>
 
       <HowToPlayModal 

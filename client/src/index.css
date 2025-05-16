@@ -259,3 +259,17 @@
   align-items: center;
   width: 100%;
 }
+
+.dev-btn {
+  color: #B9B9B9;
+  background-color: transparent;
+  border: 1px solid #B9B9B9;
+  width: 150px;
+  height: 30px;
+  transition: all 0.2s ease-in-out;
+}
+
+.dev-btn:hover {
+  color: #ffffff;
+  border-color: #ffffff;
+} 
