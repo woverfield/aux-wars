@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useGame } from "../../services/GameContext";
 import { useSocket, useSocketConnection, useGameTransition } from "../../services/SocketProvider";
-import { searchSpotifyTracks } from "../../services/spotifyApi";
+import { searchSpotifyTracks, isTokenValid } from "../../services/spotifyApi";
 import RoundStart from "./RoundStart";
 import SongSelection from "./SongSelection";
 import PromptModal from "./PromptModal";
@@ -50,6 +50,17 @@ export default function Round() {
 
   // Effects
   // =======
+
+  /**
+   * Checks token validity and redirects if invalid
+   */
+  useEffect(() => {
+    if (!isTokenValid()) {
+      console.log("No valid Spotify token found in round, redirecting to login...");
+      navigate("/login");
+      return;
+    }
+  }, [navigate]);
 
   /**
    * Redirects to lobby if not connected to socket
@@ -229,8 +240,8 @@ export default function Round() {
       try {
         const tracksOrError = await searchSpotifyTracks(searchTerm);
         if (tracksOrError?.error === "refresh_revoked") {
-          alert("Your Spotify login has expired. Please log in again.");
-          navigate("/", { replace: true });
+          console.log("Spotify token revoked, redirecting to login...");
+          navigate("/login", { replace: true });
           return;
         }
         setSearchResults(tracksOrError);
@@ -340,6 +351,10 @@ export default function Round() {
 
   // Render Logic
   // ===========
+
+  if (!isTokenValid()) {
+    return null;
+  }
 
   if (!isConnected && !isTransitioning) {
     return null;

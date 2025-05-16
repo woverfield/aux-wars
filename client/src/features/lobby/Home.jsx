@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AnimatedLogo from "../../components/AnimatedLogo";
 import HomeBtn from "../../components/HomeBtn";
 import HowToPlayModal from "../../components/HowToPlayModal";
@@ -21,6 +21,14 @@ export default function Home() {
   const [isHosting, setIsHosting] = useState(false);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
 
+  // Check token validity on mount and redirect if invalid
+  useEffect(() => {
+    if (!isTokenValid()) {
+      console.log("No valid Spotify token found, redirecting to login...");
+      navigate("/login");
+    }
+  }, [navigate]);
+
   /**
    * Handles hosting a new game.
    * Requires valid Spotify token.
@@ -31,6 +39,7 @@ export default function Home() {
     if (!socket || isHosting) return;
     
     if (!isTokenValid()) {
+      console.log("Token invalid during host game, redirecting to login...");
       navigate("/login");
       return;
     }
@@ -58,6 +67,7 @@ export default function Home() {
     }
 
     if (!isTokenValid()) {
+      console.log("Token invalid during join game, redirecting to login...");
       navigate("/login");
       return;
     }
@@ -70,6 +80,11 @@ export default function Home() {
       }
     });
   };
+
+  // If no valid token, don't render the main content
+  if (!isTokenValid()) {
+    return null;
+  }
 
   return (
     <div className="home h-svh flex flex-col items-center relative z-20">
