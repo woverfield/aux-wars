@@ -21,8 +21,10 @@ A multiplayer music game where you and your friends compete to find the perfect 
 
 ## 🚀 Getting Started
 
-### 🎮 Play Now (Coming Soon!)
-Aux Wars will be hosted online soon! Once available, you'll be able to play instantly without any setup - just visit the website and start playing with your friends.
+### 🎮 Play Now
+Aux Wars is hosted online!
+
+Play at: https://aux-wars.com/
 
 ### 🛠️ Development Setup
 If you want to run the game locally or contribute to development, follow these steps:
