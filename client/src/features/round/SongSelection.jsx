@@ -10,6 +10,7 @@ import SongList from "../../components/SongList";
  * @param {string} props.searchTerm - Current search term
  * @param {Function} props.onSearchChange - Callback for search term changes
  * @param {Array} props.searchResults - List of search results
+ * @param {string|null} props.searchError - Error message to display
  * @param {Function} props.onSelectSong - Callback when a song is selected
  * @param {Function} props.onShowPrompt - Callback to show the prompt modal
  * @param {boolean} props.showPromptModal - Whether the prompt modal is visible
@@ -19,6 +20,7 @@ export default function SongSelection({
   searchTerm, 
   onSearchChange, 
   searchResults, 
+  searchError,
   onSelectSong, 
   onShowPrompt,
   showPromptModal 
@@ -56,6 +58,11 @@ export default function SongSelection({
       </div>
 
       <div className="overflow-y-auto">
+        {searchError && (
+          <div className="mx-4 mb-4 p-4 bg-red-500 bg-opacity-20 border border-red-500 rounded-lg text-red-200 text-center">
+            <p className="font-medium">{searchError}</p>
+          </div>
+        )}
         <SongList 
           tracks={searchResults} 
           selectedTrack={selectedTrack}

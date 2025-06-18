@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useGame } from "../../services/GameContext";
 import { useSocket, useSocketConnection, useGameTransition } from "../../services/SocketProvider";
-import { searchSpotifyTracks, isTokenValid } from "../../services/spotifyApi";
+import { searchSpotifyTracks, isTokenValid, getTokenDebugInfo } from "../../services/spotifyApi";
 import RoundStart from "./RoundStart";
 import SongSelection from "./SongSelection";
 import PromptModal from "./PromptModal";
@@ -30,6 +30,7 @@ export default function Round() {
   const [isSongSelectionView, setIsSongSelectionView] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [searchError, setSearchError] = useState(null);
   const [showPromptModal, setShowPromptModal] = useState(false);
   
   // Submission Tracking State
@@ -57,8 +58,13 @@ export default function Round() {
   useEffect(() => {
     if (!isTokenValid()) {
       console.log("No valid Spotify token found in round, redirecting to login...");
+      console.log("Token debug info:", getTokenDebugInfo());
       navigate("/login");
       return;
+    }
+    // Make debug info available globally for easier debugging
+    if (typeof window !== 'undefined') {
+      window.spotifyTokenDebug = getTokenDebugInfo;
     }
   }, [navigate]);
 
@@ -233,20 +239,67 @@ export default function Round() {
   useEffect(() => {
     if (!searchTerm.trim()) {
       setSearchResults([]);
+      setSearchError(null);
       return;
     }
 
     const delayDebounce = setTimeout(async () => {
       try {
-        const tracksOrError = await searchSpotifyTracks(searchTerm);
-        if (tracksOrError?.error === "refresh_revoked") {
-          console.log("Spotify token revoked, redirecting to login...");
-          navigate("/login", { replace: true });
-          return;
+        setSearchError(null); // Clear any previous errors
+        const result = await searchSpotifyTracks(searchTerm);
+        
+        // Check if the result is an error object
+        if (result?.error) {
+          console.error(`Search error: ${result.error}`, result.message || '');
+          
+          switch (result.error) {
+            case "refresh_revoked":
+            case "auth_failed":
+            case "token_refresh_failed":
+              console.log("Authentication issue, redirecting to login...");
+              navigate("/login", { replace: true });
+              return;
+              
+            case "forbidden":
+              console.error("Spotify permissions issue - user may need to re-authorize");
+              setSearchError("Permission denied. Please re-login to Spotify.");
+              setSearchResults([]);
+              return;
+              
+            case "rate_limited":
+              console.warn("Rate limited by Spotify - please wait before searching again");
+              setSearchError("Too many requests. Please wait a moment and try again.");
+              setSearchResults([]);
+              return;
+              
+            case "network_error":
+              console.error("Network error during search:", result.message);
+              setSearchError("Network error. Please check your connection and try again.");
+              setSearchResults([]);
+              return;
+              
+            default:
+              console.error("Search failed with error:", result);
+              setSearchError("Search failed. Please try again.");
+              setSearchResults([]);
+              return;
+          }
         }
-        setSearchResults(tracksOrError);
+        
+        // If we get here, result should be an array of tracks
+        if (Array.isArray(result)) {
+          setSearchResults(result);
+          setSearchError(null);
+        } else {
+          console.warn("Unexpected search result format:", result);
+          setSearchError("Unexpected error. Please try again.");
+          setSearchResults([]);
+        }
+        
       } catch (error) {
-        console.error("Error searching tracks:", error);
+        console.error("Unexpected error during track search:", error);
+        setSearchError("An unexpected error occurred. Please try again.");
+        setSearchResults([]);
         if (!isTransitioning) {
           if (!window.location.pathname.includes('/lobby/')) {
             navigate("/lobby", { replace: true });
@@ -396,6 +449,7 @@ export default function Round() {
             searchTerm={searchTerm}
             onSearchChange={(e) => setSearchTerm(e.target.value)}
             searchResults={searchResults}
+            searchError={searchError}
             onSelectSong={handleSelectSong}
             onShowPrompt={() => setShowPromptModal(true)}
             showPromptModal={showPromptModal}

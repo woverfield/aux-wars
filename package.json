@@ -13,7 +13,7 @@
     "test:client:watch": "cd client && npm run test:ui",
     "test:client:coverage": "cd client && npm run test:coverage"
   },
-  "devDependencies": {
-    "concurrently": "^8.2.2"
+  "dependencies": {
+    "concurrently": "^9.1.2"
   }
 }

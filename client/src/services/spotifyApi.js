@@ -10,6 +10,27 @@ export function isTokenValid() {
 }
 
 /**
+ * Gets debug information about the current token state
+ * @returns {Object} Token debug information
+ */
+export function getTokenDebugInfo() {
+  const accessToken = localStorage.getItem("spotify_access_token");
+  const refreshToken = localStorage.getItem("spotify_refresh_token");
+  const expiry = localStorage.getItem("spotify_token_expiry");
+  const now = Date.now();
+  
+  return {
+    hasAccessToken: !!accessToken,
+    hasRefreshToken: !!refreshToken,
+    hasExpiry: !!expiry,
+    expiryTime: expiry ? new Date(parseInt(expiry, 10)).toISOString() : null,
+    isExpired: expiry ? now >= parseInt(expiry, 10) : null,
+    timeUntilExpiry: expiry ? Math.floor((parseInt(expiry, 10) - now) / 1000) : null,
+    tokenPreview: accessToken ? `${accessToken.substring(0, 10)}...` : null
+  };
+}
+
+/**
  * Refreshes the Spotify access token using the refresh token
  * @returns {Promise<string>} The new access token
  * @throws {Error} If refresh fails
@@ -17,8 +38,17 @@ export function isTokenValid() {
 export async function refreshSpotifyToken() {
   const refreshToken = localStorage.getItem("spotify_refresh_token");
   const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+  
+  console.log("Attempting to refresh Spotify token...");
+  
   if (!refreshToken) {
+    console.error("No refresh token found in localStorage");
     throw new Error("No refresh token available");
+  }
+
+  if (!clientId) {
+    console.error("No Spotify client ID configured");
+    throw new Error("Missing Spotify client ID");
   }
 
   const body = new URLSearchParams({
@@ -28,6 +58,7 @@ export async function refreshSpotifyToken() {
   });
 
   try {
+    console.log("Sending refresh token request to Spotify...");
     const response = await fetch("https://accounts.spotify.com/api/token", {
       method: "POST",
       headers: {
@@ -35,15 +66,38 @@ export async function refreshSpotifyToken() {
       },
       body: body.toString(),
     });
+    
     const data = await response.json();
+    
+    if (!response.ok) {
+      console.error(`Token refresh failed with status ${response.status}:`, data);
+      if (data.error === "invalid_grant") {
+        throw new Error("Refresh token revoked or invalid");
+      }
+      throw new Error(data.error_description || data.error || "Error refreshing token");
+    }
+    
     if (data.error) {
-      throw new Error(data.error_description || "Error refreshing token");
+      console.error("Spotify returned error in token refresh:", data);
+      throw new Error(data.error_description || data.error || "Error refreshing token");
+    }
+
+    if (!data.access_token) {
+      console.error("No access token in refresh response:", data);
+      throw new Error("Invalid token refresh response");
     }
 
     // Update access token and expiry time in localStorage
     const expiryTime = Date.now() + data.expires_in * 1000;
     localStorage.setItem("spotify_access_token", data.access_token);
     localStorage.setItem("spotify_token_expiry", expiryTime);
+    
+    // Update refresh token if a new one was provided
+    if (data.refresh_token) {
+      localStorage.setItem("spotify_refresh_token", data.refresh_token);
+    }
+    
+    console.log(`Token refreshed successfully, expires in ${data.expires_in} seconds`);
     return data.access_token;
   } catch (err) {
     console.error("Failed to refresh token:", err);
@@ -74,7 +128,7 @@ export async function searchSpotifyTracks(query) {
         return { error: "refresh_revoked" };
       }
       console.error("Failed to refresh token:", error);
-      return [];
+      return { error: "token_refresh_failed", message: error.message };
     }
   }
 
@@ -85,14 +139,75 @@ export async function searchSpotifyTracks(query) {
         headers: { Authorization: `Bearer ${accessToken}` },
       }
     );
+    
+    // Check if the response is successful
+    if (!res.ok) {
+      console.error(`Spotify API error: ${res.status} ${res.statusText}`);
+      
+      // Handle specific error cases
+      if (res.status === 401) {
+        // Token is invalid, try to refresh once
+        console.log("Token invalid, attempting to refresh...");
+        try {
+          const newToken = await refreshSpotifyToken();
+          // Retry the search with the new token
+          const retryRes = await fetch(
+            `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=10`,
+            {
+              headers: { Authorization: `Bearer ${newToken}` },
+            }
+          );
+          
+          if (!retryRes.ok) {
+            console.error(`Retry failed: ${retryRes.status} ${retryRes.statusText}`);
+            return { error: "auth_failed", status: retryRes.status };
+          }
+          
+          const retryData = await retryRes.json();
+          if (retryData.tracks && retryData.tracks.items) {
+            return retryData.tracks.items;
+          }
+        } catch (refreshError) {
+          console.error("Token refresh during search failed:", refreshError);
+          return { error: "refresh_revoked" };
+        }
+      } else if (res.status === 403) {
+        console.error("Forbidden: Check Spotify app permissions");
+        return { error: "forbidden", message: "Insufficient permissions" };
+      } else if (res.status === 429) {
+        console.error("Rate limited by Spotify");
+        return { error: "rate_limited", message: "Too many requests" };
+      }
+      
+      return { error: "api_error", status: res.status };
+    }
+    
     const data = await res.json();
-    if (data.tracks) {
+    
+    // Validate the response structure
+    if (!data || typeof data !== 'object') {
+      console.error("Invalid response format from Spotify:", data);
+      return { error: "invalid_response" };
+    }
+    
+    if (data.error) {
+      console.error("Spotify API returned error:", data.error);
+      return { error: "spotify_error", message: data.error.message };
+    }
+    
+    if (data.tracks && data.tracks.items) {
+      console.log(`Found ${data.tracks.items.length} tracks for query: "${query}"`);
       return data.tracks.items;
     }
+    
+    // If we get here, the response structure is unexpected
+    console.warn("Unexpected response structure:", data);
+    return [];
+    
   } catch (err) {
-    console.error("Spotify search failed:", err);
+    console.error("Spotify search failed with exception:", err);
+    return { error: "network_error", message: err.message };
   }
-  return [];
 }
 
 // --- Spotify Web Playback SDK Loader and Player Manager ---
