@@ -44,6 +44,10 @@ export default function Login() {
     localStorage.removeItem("spotify_access_token");
     localStorage.removeItem("spotify_refresh_token");
     localStorage.removeItem("spotify_token_expiry");
+    
+    // Also clear any existing auth flow data to prevent conflicts
+    localStorage.removeItem("spotify_code_verifier");
+    localStorage.removeItem("spotify_auth_state");
 
     // 3) Proceed with the Spotify auth flow
     const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
@@ -61,10 +65,16 @@ export default function Login() {
     console.log('Spotify auth scope:', scope);
 
     const codeVerifier = generateRandomString(128);
+    const state = generateRandomString(16);
+    
+    // Store both verifier and state for validation
     localStorage.setItem("spotify_code_verifier", codeVerifier);
+    localStorage.setItem("spotify_auth_state", state);
+    
+    console.log("Stored code_verifier:", codeVerifier.substring(0, 10) + "...");
 
     const codeChallenge = await generateCodeChallenge(codeVerifier);
-    const state = generateRandomString(16);
+    console.log("Generated code_challenge:", codeChallenge.substring(0, 10) + "...");
 
     // Construct the Spotify login URL
     const authUrl = `https://accounts.spotify.com/authorize

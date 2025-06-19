@@ -15,6 +15,7 @@ export default function SpotifyCallback() {
     const queryParams = new URLSearchParams(location.search);
     const code = queryParams.get("code");
     const error = queryParams.get("error");
+    const state = queryParams.get("state");
 
     if (error) {
       console.error("Spotify authentication error:", error);
@@ -29,11 +30,20 @@ export default function SpotifyCallback() {
     }
 
     const codeVerifier = localStorage.getItem("spotify_code_verifier");
+    const storedState = localStorage.getItem("spotify_auth_state");
+    
+    console.log("Retrieved code_verifier:", codeVerifier ? codeVerifier.substring(0, 10) + "..." : "MISSING");
+    console.log("State match:", state === storedState ? "YES" : "NO");
+    
     if (!codeVerifier) {
-      console.error("Missing code verifier.");
+      console.error("Missing code verifier. User may have cleared localStorage or used multiple tabs.");
+      alert("Authentication failed. Please try logging in again without opening multiple tabs.");
       navigate("/");
       return;
     }
+    
+    // Clean up state
+    localStorage.removeItem("spotify_auth_state");
 
     /**
      * Fetches access and refresh tokens from Spotify using the authorization code
@@ -62,6 +72,9 @@ export default function SpotifyCallback() {
         const data = await response.json();
         if (data.error) {
           console.error("Error fetching token:", data);
+          if (data.error === "invalid_grant" && data.error_description?.includes("code_verifier")) {
+            alert("Authentication failed due to a verification error. This usually happens when using multiple tabs or clearing browser data during login. Please try again.");
+          }
           navigate("/");
         } else {
           // Calculate and store the token expiry time in milliseconds
@@ -69,6 +82,10 @@ export default function SpotifyCallback() {
           localStorage.setItem("spotify_access_token", data.access_token);
           localStorage.setItem("spotify_refresh_token", data.refresh_token);
           localStorage.setItem("spotify_token_expiry", expiryTime);
+          
+          // Clean up the code verifier after successful exchange
+          localStorage.removeItem("spotify_code_verifier");
+          
           console.log("Spotify token fetched successfully + expiry time:", data.expires_in);
           navigate("/lobby");
         }
