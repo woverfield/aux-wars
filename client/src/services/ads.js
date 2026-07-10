@@ -19,8 +19,8 @@ const AD_SLOTS = {
   gameover: import.meta.env.VITE_ADSENSE_SLOT_GAMEOVER || '',
 };
 
-const CONSENT_KEY = 'aux-wars-cookie-consent'; // 'accepted' | 'rejected' | null
-const CONSENT_EVENT = 'aux-wars-consent-changed';
+export const CONSENT_KEY = 'aux-wars-cookie-consent'; // 'accepted' | 'rejected' | null
+export const CONSENT_EVENT = 'aux-wars-consent-changed';
 
 /** True only when an AdSense client id is configured. */
 export function adsConfigured() {
