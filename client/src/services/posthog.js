@@ -11,13 +11,11 @@
  * but honor an explicit `rejected` choice if/when the banner goes live.
  */
 import posthog from "posthog-js";
-import { getConsent } from "./ads";
+import { CONSENT_EVENT, CONSENT_KEY, getConsent } from "./ads";
 import { getVisitorId } from "../utils/visitorId";
 
 const KEY = import.meta.env.VITE_POSTHOG_KEY || "";
 const HOST = import.meta.env.VITE_POSTHOG_HOST || "https://us.i.posthog.com";
-const CONSENT_EVENT = "aux-wars-consent-changed"; // mirrors ads.js
-
 let started = false;
 
 function sanitizeUrl(value) {
@@ -37,11 +35,22 @@ function sanitizeEvent(event) {
   return event;
 }
 
+export function syncPostHogConsent(client, consent) {
+  const optedOut = client.has_opted_out_capturing();
+
+  if (consent === "rejected") {
+    if (!optedOut) client.opt_out_capturing();
+    return;
+  }
+
+  // Capture is already on by default. Only transition back from an explicit
+  // rejection, and suppress PostHog's otherwise-billable `$opt_in` event.
+  if (optedOut) client.opt_in_capturing({ captureEventName: false });
+}
+
 function applyConsent() {
   if (!started) return;
-  // 'rejected' opts out; 'accepted'/null capture (matches existing analytics).
-  if (getConsent() === "rejected") posthog.opt_out_capturing();
-  else posthog.opt_in_capturing();
+  syncPostHogConsent(posthog, getConsent());
 }
 
 /** Initialize once. Safe to call when no key is set (it just no-ops). */
@@ -80,7 +89,11 @@ export function initPostHog() {
 
   applyConsent();
   window.addEventListener(CONSENT_EVENT, applyConsent);
-  window.addEventListener("storage", applyConsent);
+  window.addEventListener("storage", (event) => {
+    // PostHog and the game both write heavily to localStorage. Reacting to all
+    // of those writes caused cross-tab `$opt_in` feedback loops.
+    if (event.key === CONSENT_KEY) applyConsent();
+  });
 }
 
 /** Fire-and-forget event capture; no-ops until initialized, never throws. */
