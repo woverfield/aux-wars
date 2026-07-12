@@ -1,6 +1,6 @@
 # Packet 001 — Kill the Convex presence invalidation storm
 
-**Branch:** `fix/convex-presence-invalidation` · **Status:** building
+**Branch:** `fix/convex-presence-invalidation` · **Status:** in review
 **Spec+status live here** (no Linear issue: Linear was unauthenticated in the
 authoring session).
 
