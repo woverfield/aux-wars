@@ -1,85 +1,122 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 
 /**
- * Custom hook for managing player session data
- * Combines persistent data (localStorage) with per-tab connection tracking
+ * Player session state, shared across every component that calls useSession().
  *
  * Session Model:
  * - playerId: Persistent across refreshes (localStorage)
- * - connectionId: Unique per browser tab/page load (ephemeral)
+ * - connectionId: Unique per browser tab/page load (sessionStorage)
  * - This allows refresh to work while preventing duplicate tabs
+ *
+ * The session lives in ONE module-level store (not per-hook React state).
+ * Every useSession() instance reads the same snapshot via useSyncExternalStore
+ * and writes through the same setter, so clearing the session in one component
+ * cannot be raced by another component writing its own stale copy back to
+ * localStorage (the old per-instance-state design did exactly that after a
+ * kick: GameRouteGuard's updateSession resurrected the session Lobby had just
+ * cleared).
  */
-export function useSession() {
-  const STORAGE_KEY = 'auxWarsSession';
 
-  // Generate unique connectionId for this browser tab
-  // Stored in sessionStorage to persist across navigation within same tab
-  // but unique per tab (prevents duplicate tab issues)
-  const connectionId = useMemo(() => {
-    const key = 'aux-wars-connection-id';
-    let id = sessionStorage.getItem(key);
+const STORAGE_KEY = 'auxWarsSession';
+const CONNECTION_KEY = 'aux-wars-connection-id';
+
+// One connectionId per browser tab: persists across navigation within the tab
+// (sessionStorage) but is unique per tab, which prevents duplicate-tab issues.
+let connectionId = null;
+function getConnectionId() {
+  if (connectionId) return connectionId;
+  try {
+    let id = sessionStorage.getItem(CONNECTION_KEY);
     if (!id) {
       id = crypto.randomUUID();
-      sessionStorage.setItem(key, id);
+      sessionStorage.setItem(CONNECTION_KEY, id);
     }
-    return id;
-  }, []);
+    connectionId = id;
+  } catch {
+    connectionId = crypto.randomUUID();
+  }
+  return connectionId;
+}
 
-  // Initialize state from localStorage
-  const [session, setSession] = useState(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      const parsedSession = stored ? JSON.parse(stored) : null;
+function loadStoredSession() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    const parsed = stored ? JSON.parse(stored) : null;
+    return parsed ? { ...parsed, connectionId: getConnectionId() } : null;
+  } catch {
+    return null;
+  }
+}
 
-      // Add connectionId to session
-      if (parsedSession) {
-        return { ...parsedSession, connectionId };
-      }
-      return null;
-    } catch (error) {
-      return null;
-    }
-  });
+let currentSession = loadStoredSession();
+const listeners = new Set();
 
-  // Save session to localStorage whenever it changes
-  // Note: connectionId is NOT saved to localStorage (it's in sessionStorage)
-  useEffect(() => {
-    if (session) {
-      try {
-        // Exclude connectionId from localStorage (it's tab-specific, stored in sessionStorage)
-        const { connectionId: _, ...sessionToStore } = session;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(sessionToStore));
-      } catch (error) {
-        // Storage not available - session won't persist
-      }
+function setSession(next) {
+  currentSession = next;
+  // Write-through persistence: the store is the only writer of the storage
+  // key. connectionId is tab-specific and lives in sessionStorage, never here.
+  try {
+    if (next) {
+      const { connectionId: omitted, ...toStore } = next; void omitted;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
-  }, [session]);
+  } catch {
+    // Storage not available - session won't persist
+  }
+  listeners.forEach((listener) => listener());
+}
 
-  // Create or update session
-  const createSession = useCallback((data) => {
-    const newSession = {
-      playerId: data.playerId || crypto.randomUUID(),
-      connectionId, // Add ephemeral connectionId
-      gameCode: data.gameCode,
-      playerName: data.playerName || '',
-      lastPhase: data.lastPhase || 'lobby',
-      timestamp: Date.now()
-    };
-    setSession(newSession);
-    return newSession;
-  }, [connectionId]);
+function subscribe(listener) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
 
-  // Update specific session fields
-  const updateSession = useCallback((updates) => {
-    setSession(prev => prev ? { ...prev, ...updates, connectionId, timestamp: Date.now() } : null);
-  }, [connectionId]);
+function getSnapshot() {
+  return currentSession;
+}
 
-  // Clear session
-  const clearSession = useCallback(() => {
-    setSession(null);
-  }, []);
+// Create or update session
+function createSession(data) {
+  const newSession = {
+    playerId: data.playerId || crypto.randomUUID(),
+    connectionId: getConnectionId(),
+    gameCode: data.gameCode,
+    playerName: data.playerName || '',
+    lastPhase: data.lastPhase || 'lobby',
+    timestamp: Date.now(),
+  };
+  setSession(newSession);
+  return newSession;
+}
+
+// Update specific session fields. A cleared (null) session stays cleared:
+// updates never resurrect it.
+function updateSession(updates) {
+  if (!currentSession) return;
+  setSession({
+    ...currentSession,
+    ...updates,
+    connectionId: getConnectionId(),
+    timestamp: Date.now(),
+  });
+}
+
+// Clear session
+function clearSession() {
+  setSession(null);
+}
+
+// Test-only: reset the module store between tests.
+export function _resetSessionStoreForTests() {
+  connectionId = null;
+  currentSession = loadStoredSession();
+  listeners.forEach((listener) => listener());
+}
+
+export function useSession() {
+  const session = useSyncExternalStore(subscribe, getSnapshot);
 
   // Check if session is valid (not expired - 24 hour expiry)
   const isSessionValid = useCallback(() => {
@@ -90,10 +127,10 @@ export function useSession() {
 
   return {
     session,
-    connectionId, // Expose connectionId so callers can use it before session is created
+    connectionId: getConnectionId(), // usable before a session is created
     createSession,
     updateSession,
     clearSession,
-    isSessionValid
+    isSessionValid,
   };
 }
