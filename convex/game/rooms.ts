@@ -235,7 +235,9 @@ export const leaveGame = mutation({
     }
 
     // Reassign host if needed
-    if (room.hostPlayerId && leaving && room.hostPlayerId.id === leaving._id.id) {
+    // Convex Ids are branded strings: compare them directly (`.id` does not
+    // exist on them; `a.id === b.id` is undefined === undefined, always true).
+    if (room.hostPlayerId && leaving && room.hostPlayerId === leaving._id) {
       const sortedRemaining = [...remaining].sort((a, b) => a._creationTime - b._creationTime);
       if (sortedRemaining[0]) {
         await ctx.db.patch(room._id, { hostPlayerId: sortedRemaining[0]._id });
@@ -301,18 +303,27 @@ export const kickPlayer = mutation({
 
 /**
  * Reactive connection watcher (replaces the old 5s heartbeat polling).
- * Returns the player's currently active connectionId, or null when the player
- * is no longer in the room (kicked, or room deleted). Clients compare the
- * result against their own connectionId: a mismatch means TAKEN_OVER, null
- * means NOT_FOUND (clear session + navigate home). The player doc only
- * changes on real actions now, so this subscription is quiet.
+ * The client sends ITS connectionId and gets back a status — the server never
+ * returns the active connectionId itself, because that value is the only
+ * credential guarding kick/settings/lock mutations (validateConnection) and
+ * must not leak to a tab that no longer holds it.
+ *
+ * Returns 'ACTIVE' (this tab holds the connection), 'TAKEN_OVER' (another
+ * tab/device took over), or null (player gone: kicked, or room deleted).
+ * Read set is unchanged from the old shape (one player doc via by_player),
+ * so invalidation behavior is identical and the subscription stays quiet.
  */
 export const getPlayerConnection = query({
-  args: { code: v.string(), playerId: v.string() },
-  handler: async (ctx, { code, playerId }) => {
+  args: { code: v.string(), playerId: v.string(), connectionId: v.string() },
+  handler: async (ctx, { code, playerId, connectionId }) => {
     const player = await getPlayer(ctx, code, playerId);
     if (!player) return null;
-    return { connectionId: player.connectionId ?? null };
+    // Legacy rows may lack a connectionId; treat as not-taken-over (matches
+    // the old client-side `connection.connectionId && mismatch` guard).
+    if (!player.connectionId || player.connectionId === connectionId) {
+      return "ACTIVE" as const;
+    }
+    return "TAKEN_OVER" as const;
   },
 });
 

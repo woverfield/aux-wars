@@ -11,6 +11,7 @@
     "install-all": "npm install && cd client && npm install && cd ../server && npm install",
     "test": "concurrently \"npm run test:client\" \"npm run test:server\"",
     "test:convex": "vitest run --config vitest.config.mts",
+    "typecheck:convex": "tsc --noEmit -p convex",
     "test:client": "cd client && npm test",
     "test:server": "cd server && npm test",
     "test:client:watch": "cd client && npm run test:ui",
@@ -26,8 +27,10 @@
   },
   "devDependencies": {
     "@edge-runtime/vm": "^5.0.0",
+    "@types/node": "^26.1.1",
     "concurrently": "^9.1.2",
     "convex-test": "^0.0.54",
+    "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   }
 }

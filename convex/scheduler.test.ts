@@ -47,8 +47,8 @@ async function insertPlayer(
   connectedAt: number,
   isHost = false
 ) {
-  await t.run(async (ctx) => {
-    await ctx.db.insert("players", {
+  return await t.run(async (ctx) =>
+    ctx.db.insert("players", {
       roomCode: code,
       playerId,
       connectionId: `conn-${playerId}`,
@@ -57,7 +57,21 @@ async function insertPlayer(
       isReady: false,
       connectedAt,
       isActive: true,
-    });
+    })
+  );
+}
+
+async function setHost(
+  t: ReturnType<typeof setup>,
+  code: string,
+  hostPlayerId: Awaited<ReturnType<typeof insertPlayer>>
+) {
+  await t.run(async (ctx) => {
+    const room = await ctx.db
+      .query("rooms")
+      .withIndex("by_code", (q) => q.eq("code", code))
+      .unique();
+    await ctx.db.patch(room!._id, { hostPlayerId });
   });
 }
 
@@ -143,6 +157,71 @@ test("cleanupInactivePlayers keeps online players, removes long-gone ones", asyn
   expect(players.map((p) => p.playerId)).toEqual(["host"]);
   // Room survives: it still has a connected player.
   expect(await getRoom(t, "QAMIXD")).not.toBeNull();
+});
+
+// Regression tests for the Id comparison bug: `p._id.id === hostPlayerId.id`
+// was undefined === undefined (Convex Ids are branded strings, no `.id`
+// field), so EVERY sweep looked like "host removed" and reassigned the host
+// to the earliest-created survivor.
+
+test("sweeping a stale NON-host player does not reassign the host", async () => {
+  const t = setup();
+  const longAgo = Date.now() - PLAYER_TIMEOUT_MS - 5 * 60 * 1000;
+  await insertRoom(t, "QAHOST", Date.now() - HOUR);
+  // buddy is created BEFORE the host: under the old always-true comparison the
+  // sweep would "reassign" the host to buddy (earliest remaining player).
+  await insertPlayer(t, "QAHOST", "buddy", Date.now() - HOUR, false);
+  const hostDocId = await insertPlayer(t, "QAHOST", "host", Date.now() - HOUR, true);
+  await insertPlayer(t, "QAHOST", "ghost", longAgo, false); // stale, never heartbeats
+  await setHost(t, "QAHOST", hostDocId);
+
+  // Host and buddy are online via presence; ghost never registered.
+  for (const userId of ["host", "buddy"]) {
+    await t.mutation(api.presence.heartbeat, {
+      roomId: "QAHOST",
+      userId,
+      sessionId: `session-${userId}`,
+      interval: 30000,
+    });
+  }
+
+  await t.mutation(internal.game.scheduler.cleanupInactivePlayers, {});
+
+  const players = await getPlayers(t, "QAHOST");
+  expect(players.map((p) => p.playerId).sort()).toEqual(["buddy", "host"]);
+
+  const room = await getRoom(t, "QAHOST");
+  expect(room!.hostPlayerId).toEqual(hostDocId); // host untouched
+  const buddy = players.find((p) => p.playerId === "buddy");
+  expect(buddy!.isHost).toBe(false);
+  const host = players.find((p) => p.playerId === "host");
+  expect(host!.isHost).toBe(true);
+});
+
+test("sweeping the stale host reassigns the host to a survivor", async () => {
+  const t = setup();
+  const longAgo = Date.now() - PLAYER_TIMEOUT_MS - 5 * 60 * 1000;
+  await insertRoom(t, "QAHOFF", Date.now() - HOUR);
+  const hostDocId = await insertPlayer(t, "QAHOFF", "host", longAgo, true); // stale
+  const buddyDocId = await insertPlayer(t, "QAHOFF", "buddy", Date.now() - HOUR, false);
+  await setHost(t, "QAHOFF", hostDocId);
+
+  // Only buddy is online; the host is long gone and never heartbeats.
+  await t.mutation(api.presence.heartbeat, {
+    roomId: "QAHOFF",
+    userId: "buddy",
+    sessionId: "session-buddy",
+    interval: 30000,
+  });
+
+  await t.mutation(internal.game.scheduler.cleanupInactivePlayers, {});
+
+  const players = await getPlayers(t, "QAHOFF");
+  expect(players.map((p) => p.playerId)).toEqual(["buddy"]);
+
+  const room = await getRoom(t, "QAHOFF");
+  expect(room!.hostPlayerId).toEqual(buddyDocId);
+  expect(players[0].isHost).toBe(true);
 });
 
 test("cleanupInactivePlayers gives recently-joined players grace", async () => {

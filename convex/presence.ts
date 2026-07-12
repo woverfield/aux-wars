@@ -9,6 +9,21 @@ import { mutation, query } from "./_generated/server";
 // never fold presence timestamps back into rooms/players docs.
 export const presence = new Presence(components.presence);
 
+// Server-side clamp on the client-supplied heartbeat interval. The component
+// schedules its offline flip at ~2.5x the interval, so a hostile client
+// passing e.g. 1e15 (or NaN) could pin a session "online" essentially forever
+// and defeat both cleanup crons. The real client sends 30s.
+const MIN_HEARTBEAT_INTERVAL_MS = 5000;
+const MAX_HEARTBEAT_INTERVAL_MS = 60000;
+
+function clampInterval(interval: number): number {
+  if (!Number.isFinite(interval)) return MAX_HEARTBEAT_INTERVAL_MS;
+  return Math.min(
+    Math.max(interval, MIN_HEARTBEAT_INTERVAL_MS),
+    MAX_HEARTBEAT_INTERVAL_MS
+  );
+}
+
 export const heartbeat = mutation({
   args: {
     roomId: v.string(), // room code
@@ -36,7 +51,13 @@ export const heartbeat = mutation({
       return { roomToken: "", sessionToken: "" };
     }
 
-    return await presence.heartbeat(ctx, roomId, userId, sessionId, interval);
+    return await presence.heartbeat(
+      ctx,
+      roomId,
+      userId,
+      sessionId,
+      clampInterval(interval)
+    );
   },
 });
 

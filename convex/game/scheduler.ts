@@ -114,9 +114,11 @@ export const cleanupInactivePlayers = internalMutation({
         continue;
       }
 
-      // If host was removed, reassign host
+      // If host was removed, reassign host. Convex Ids are branded strings:
+      // compare them directly (`.id` does not exist on them; `a.id === b.id`
+      // is undefined === undefined, which made this true for EVERY sweep).
       const hostWasRemoved = room.hostPlayerId && stalePlayers.some(
-        (p) => p._id.id === room.hostPlayerId!.id
+        (p) => p._id === room.hostPlayerId
       );
 
       if (hostWasRemoved) {
