@@ -1,6 +1,6 @@
 # Packet 001 — Kill the Convex presence invalidation storm
 
-**Branch:** `fix/convex-presence-invalidation` · **Status:** in review
+**Branch:** `fix/convex-presence-invalidation` · **Status:** MERGED (PR #31, 2026-07-12) + deployed to prod. Follow-ups landed same day: PR #32 (session race), PR #33 (lint green + ts 5.9 pin)
 **Spec+status live here** (no Linear issue: Linear was unauthenticated in the
 authoring session).
 
