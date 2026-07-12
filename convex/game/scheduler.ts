@@ -14,8 +14,10 @@ export const STALE_ROOM_CUTOFF_MS = 24 * 60 * 60 * 1000; // 24 hours
 // Player timeout. The presence component flips a player offline ~75s after
 // their last heartbeat (2.5x the 30s interval), or instantly on clean tab
 // close / hidden tab. We then give them this long to come back (refresh,
-// reopen tab) before removing them from the room.
-export const PLAYER_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+// reopen tab) before removing them from the room. 30 min because real
+// sessions run hours and phones lock between turns; hidden tab = offline,
+// so this is the whole grace window for a backgrounded player.
+export const PLAYER_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
 /**
  * Deletes rooms with no real game activity past the cutoff.
