@@ -22,7 +22,7 @@ export const startGame = mutation({
     const host = await validateConnection(ctx, code, playerId, connectionId);
     if (!host || !host.isHost) return; // only active host tab
     if (players.length < 2) return; // min players (2 = 1v1 listening session)
-    const allReady = players.every((p) => p.isReady);
+    const allReady = players.every((p: any) => p.isReady);
     if (!allReady) return;
 
     const chosenPrompt = pickPrompt(room.settings.selectedPrompts, []);
@@ -174,7 +174,7 @@ export const submitSong = mutation({
 
     // Robust unique-submitter check
     const submittedPlayerIds = new Set(subs.map((s) => s.playerId));
-    const allSubmitted = players.every((p) => submittedPlayerIds.has(p.playerId));
+    const allSubmitted = players.every((p: any) => submittedPlayerIds.has(p.playerId));
 
     if (allSubmitted) {
       // Use scheduler to avoid direct mutation-to-mutation call
@@ -287,7 +287,7 @@ export const nextRound = mutation({
     // Clean submittedRounds for all players in new round
     const players = await getPlayers(ctx, code);
     await Promise.all(
-      players.map((p) => ctx.db.patch(p._id, { submittedRounds: [] }))
+      players.map((p: any) => ctx.db.patch(p._id, { submittedRounds: [] }))
     );
 
     if (enablePromptVoting) {
@@ -374,7 +374,7 @@ export const returnToLobby = mutation({
     });
 
     const players = await getPlayers(ctx, code);
-    await Promise.all(players.map((p) => ctx.db.patch(p._id, { isReady: false, submittedRounds: [] })));
+    await Promise.all(players.map((p: any) => ctx.db.patch(p._id, { isReady: false, submittedRounds: [] })));
   },
 });
 
@@ -554,7 +554,7 @@ export const voteSkipPrompt = mutation({
     if (!room || room.phase !== "promptVoting") return { success: false };
 
     const players = await getPlayers(ctx, code);
-    const player = players.find((p) => p.playerId === playerId);
+    const player = players.find((p: any) => p.playerId === playerId);
     if (!player) return { success: false };
 
     // Validate connection to prevent multi-tab vote manipulation
@@ -898,7 +898,7 @@ export const endSelectionPhase = internalMutation({
       .collect();
 
     const submittedPlayerIds = new Set(subs.map((s) => s.playerId));
-    const allSubmitted = players.every((p) => submittedPlayerIds.has(p.playerId));
+    const allSubmitted = players.every((p: any) => submittedPlayerIds.has(p.playerId));
 
     if (allSubmitted) {
       // All submitted - normal transition

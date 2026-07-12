@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { containsHateSpeech } from "./contentFilter";
+import { presence } from "../presence";
 
 function now() {
   return Date.now();
@@ -107,7 +108,6 @@ export const joinGame = mutation({
         connectionId,           // Update to new connection ID
         name: trimmedName,      // Update name in case it changed
         connectedAt: now(),     // Record when this connection was established
-        lastSeenAt: now(),      // Update last seen
         isActive: true,         // Mark this connection as active
         // Clear rate limit timestamps to prevent bypass via refresh
         lastSubmissionAttempt: undefined,
@@ -133,7 +133,6 @@ export const joinGame = mutation({
         isHost: isFirst,
         isReady: false,
         connectedAt: now(),
-        lastSeenAt: now(),
         isActive: true,
       });
 
@@ -185,7 +184,6 @@ export const rejoinGame = mutation({
       .withIndex("by_player", (q) => q.eq("playerId", playerId).eq("roomCode", code))
       .unique();
     if (!player) return { success: false, message: "Player not found in game" };
-    await ctx.db.patch(player._id, { lastSeenAt: now() });
     await touchRoom(ctx, room._id);
     return {
       success: true,
@@ -237,7 +235,9 @@ export const leaveGame = mutation({
     }
 
     // Reassign host if needed
-    if (room.hostPlayerId && leaving && room.hostPlayerId.id === leaving._id.id) {
+    // Convex Ids are branded strings: compare them directly (`.id` does not
+    // exist on them; `a.id === b.id` is undefined === undefined, always true).
+    if (room.hostPlayerId && leaving && room.hostPlayerId === leaving._id) {
       const sortedRemaining = [...remaining].sort((a, b) => a._creationTime - b._creationTime);
       if (sortedRemaining[0]) {
         await ctx.db.patch(room._id, { hostPlayerId: sortedRemaining[0]._id });
@@ -301,34 +301,29 @@ export const kickPlayer = mutation({
   },
 });
 
-export const heartbeat = mutation({
+/**
+ * Reactive connection watcher (replaces the old 5s heartbeat polling).
+ * The client sends ITS connectionId and gets back a status — the server never
+ * returns the active connectionId itself, because that value is the only
+ * credential guarding kick/settings/lock mutations (validateConnection) and
+ * must not leak to a tab that no longer holds it.
+ *
+ * Returns 'ACTIVE' (this tab holds the connection), 'TAKEN_OVER' (another
+ * tab/device took over), or null (player gone: kicked, or room deleted).
+ * Read set is unchanged from the old shape (one player doc via by_player),
+ * so invalidation behavior is identical and the subscription stays quiet.
+ */
+export const getPlayerConnection = query({
   args: { code: v.string(), playerId: v.string(), connectionId: v.string() },
   handler: async (ctx, { code, playerId, connectionId }) => {
-    const player = await ctx.db
-      .query("players")
-      .withIndex("by_player", (q) => q.eq("playerId", playerId).eq("roomCode", code))
-      .unique();
-
-    if (!player) {
-      return { status: 'NOT_FOUND' } as const;
+    const player = await getPlayer(ctx, code, playerId);
+    if (!player) return null;
+    // Legacy rows may lack a connectionId; treat as not-taken-over (matches
+    // the old client-side `connection.connectionId && mismatch` guard).
+    if (!player.connectionId || player.connectionId === connectionId) {
+      return "ACTIVE" as const;
     }
-
-    // Check if THIS connection is still the active one
-    if (player.connectionId !== connectionId) {
-      // Another connection has taken over - this tab should disconnect
-      return {
-        status: 'TAKEN_OVER',
-        activeConnectionId: player.connectionId
-      } as const;
-    }
-
-    // Update last seen timestamp
-    await ctx.db.patch(player._id, { lastSeenAt: now() });
-
-    const room = await getRoomByCodeInternal(ctx, code);
-    if (room) await touchRoom(ctx, room._id);
-
-    return { status: 'OK' } as const;
+    return "TAKEN_OVER" as const;
   },
 });
 
@@ -355,7 +350,6 @@ export const updatePlayerName = mutation({
     await ctx.db.patch(player._id, {
       name: name ? name.trim() : player.name,
       isReady: typeof isReady === "boolean" ? isReady : player.isReady,
-      lastSeenAt: now(),
     });
     const room = await getRoomByCodeInternal(ctx, code);
     if (room) await touchRoom(ctx, room._id);
@@ -633,7 +627,6 @@ function publicPlayer(player: any) {
     isHost: player.isHost,
     isReady: player.isReady,
     connectedAt: player.connectedAt,
-    lastSeenAt: player.lastSeenAt,
     isActive: player.isActive,
     submittedRounds: player.submittedRounds,
   };
@@ -711,6 +704,9 @@ async function deleteRoomAndData(ctx: any, room: any) {
 
   // Finally delete the room itself
   await ctx.db.delete(room._id);
+
+  // Clear the room's presence state in the component too.
+  await presence.removeRoom(ctx, code);
 
   console.log(`[deleteRoomAndData] Deleted room ${code} and all associated data`);
 }
