@@ -29,6 +29,9 @@ export default [
       ...react.configs['jsx-runtime'].rules,
       ...reactHooks.configs.recommended.rules,
       'react/jsx-no-target-blank': 'off',
+      // Plain-JSX app: PropTypes were never adopted anywhere in the codebase,
+      // so this rule only produced noise (252 errors) that buried real findings.
+      'react/prop-types': 'off',
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },

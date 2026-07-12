@@ -1,4 +1,3 @@
-import React from "react";
 import settingsIcon from "../assets/settings-btn.svg";
 
 /**

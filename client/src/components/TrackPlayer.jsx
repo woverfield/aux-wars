@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import { forwardRef } from 'react';
 import AudioPreviewPlayer from './AudioPreviewPlayer';
 import YouTubePlayerWithRef from './YouTubePlayer';
 

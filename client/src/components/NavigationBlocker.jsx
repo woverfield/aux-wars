@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 
@@ -9,7 +9,6 @@ import { api } from '../../../convex/_generated/api';
  */
 export default function NavigationBlocker() {
   const location = useLocation();
-  const navigate = useNavigate();
 
   // Extract gameCode from URL path
   const gameCodeMatch = location.pathname.match(/\/lobby\/([^/]+)/);

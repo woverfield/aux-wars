@@ -65,11 +65,11 @@ export default function HowToPlayModal({ showModal, onClose }) {
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="text-[#68d570] mt-1">▸</span>
-                    <p>Each round, you'll get a creative prompt and a short time to search for the perfect song.</p>
+                    <p>Each round, you&apos;ll get a creative prompt and a short time to search for the perfect song.</p>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="text-[#68d570] mt-1">▸</span>
-                    <p>Listen to 30-second previews of everyone's submissions and rate them from 1 to 5.</p>
+                    <p>Listen to 30-second previews of everyone&apos;s submissions and rate them from 1 to 5.</p>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="text-[#68d570] mt-1">▸</span>
@@ -108,7 +108,7 @@ export default function HowToPlayModal({ showModal, onClose }) {
                 </div>
                 <ul className="space-y-3 pl-11 text-gray-300">
                   <li className="bg-[#242424] p-4 rounded-md border-l-4 border-[#68d570]">
-                    <p><strong>Match the Vibe:</strong> Think about how the song fits the prompt's mood, not just the lyrics.</p>
+                    <p><strong>Match the Vibe:</strong> Think about how the song fits the prompt&apos;s mood, not just the lyrics.</p>
                   </li>
                   <li className="bg-[#242424] p-4 rounded-md border-l-4 border-[#68d570]">
                     <p><strong>Be Creative:</strong> Sometimes the most unexpected song choice is a winner.</p>

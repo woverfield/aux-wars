@@ -16,8 +16,8 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-lg font-semibold text-white mb-2">The short version</h2>
             <p>
-              Aux Wars is a free party game with no accounts and no logins. We don't ask for
-              your name beyond a temporary display name you type for a game, and we don't sell
+              Aux Wars is a free party game with no accounts and no logins. We don&apos;t ask for
+              your name beyond a temporary display name you type for a game, and we don&apos;t sell
               your personal information.
             </p>
           </section>

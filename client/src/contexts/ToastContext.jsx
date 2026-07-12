@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import Toast from '../components/Toast';
 

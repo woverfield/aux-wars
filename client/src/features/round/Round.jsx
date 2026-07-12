@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 // GameContext removed - using Convex queries directly
 // import { useSocket, useSocketConnection, useGameTransition } from "../../services/SocketProvider";
@@ -39,7 +39,6 @@ export default function Round() {
   const navigate = useNavigate();
   // const socket = useSocket();
   // const isConnected = useSocketConnection();
-  const setGameTransition = () => {};
   const roomQuery = useQuery(api.game.rooms.getRoomByCode, gameCode ? { code: gameCode } : 'skip');
   const currentRatingSong = useQuery(api.game.flow.getCurrentRatingSong, gameCode ? { code: gameCode } : 'skip');
   const submissionStatus = useQuery(api.game.flow.getSubmissionStatus, gameCode ? { code: gameCode } : 'skip');
@@ -97,9 +96,6 @@ export default function Round() {
 
   // Optimistic UI flag for rating phase (prevent double-submission during query update window)
   const [hasRatingSubmitted, setHasRatingSubmitted] = useState(false);
-
-  // Transition State
-  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Ref for SnippetSelector to get current selection on auto-submit
   const snippetSelectorRef = useRef(null);
@@ -329,7 +325,7 @@ export default function Round() {
           setSearchError("Search service temporarily unavailable. Please try again.");
           setSearchResults([]);
         }
-      } catch (error) {
+      } catch {
         if (cancelled) return;
         captureGameEvent("song_search_failed", gameProperties({
           code: gameCode,
@@ -496,7 +492,7 @@ export default function Round() {
         },
       }));
       setHasRatingSubmitted(true);
-    } catch (e) {
+    } catch {
       showToast("Failed to submit rating.", "error");
     }
   };

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -9,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
  * This happens when the same playerId connects from a different browser tab
  * or device, implementing the "single active connection" pattern.
  */
-export default function SessionTakenOverModal({ show, gameCode }) {
+export default function SessionTakenOverModal({ show }) {
   const navigate = useNavigate();
 
   const handleReturnHome = () => {
