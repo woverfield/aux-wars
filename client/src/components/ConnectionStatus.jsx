@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * ConnectionStatus component displays connection state to users
  * Shows reconnecting overlay when connection is lost

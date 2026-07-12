@@ -61,7 +61,7 @@ async function performSearch(query, cacheKey) {
 
     return tracks;
 
-  } catch (error) {
+  } catch {
 
     // Increment error count for this query
     const currentErrors = errorCounts.get(cacheKey) || 0;
@@ -122,7 +122,7 @@ export async function searchTracks(query) {
   try {
     const results = await requestPromise;
     return results;
-  } catch (error) {
+  } catch {
 
     // Return cached data if available, even if stale
     const stale = searchCache.get(cacheKey);

@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 /**
  * YouTubePlayerWithRef
@@ -72,7 +72,7 @@ const YouTubePlayerWithRef = forwardRef(function YouTubePlayerWithRef(
   const mountedRef = useRef(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [isReady, setIsReady] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0); // window-relative
   const [duration, setDuration] = useState(0);       // window length
   const [playerError, setPlayerError] = useState(false);

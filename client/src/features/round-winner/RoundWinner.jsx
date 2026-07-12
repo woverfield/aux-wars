@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 // GameContext removed - using Convex queries directly
 // import { useSocket, useSocketConnection, useGameTransition } from "../../services/SocketProvider";
@@ -23,7 +23,6 @@ import ScrollFade from "../../components/ScrollFade";
  */
 export default function RoundWinner() {
   const { gameCode } = useParams();
-  const navigate = useNavigate();
   // const socket = useSocket();
   // const isConnected = useSocketConnection();
   const setGameTransition = () => {};

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 // import { useSocket, useSocketConnection } from "../../services/SocketProvider";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -28,12 +28,12 @@ export default function Lobby() {
   // const socket = useSocket();
   const navigate = useNavigate();
   const { gameCode: routeGameCode } = useParams();
-  const { session, createSession, updateSession, clearSession } = useSession();
+  const { session, updateSession, clearSession } = useSession();
   const { showToast } = useToast();
   const [gameCode, setGameCode] = useState(routeGameCode || "");
   const [name, setName] = useState(session?.playerName || "");
   const [isReady, setIsReady] = useState(false);
-  const [animateInput, setAnimateInput] = useState(false);
+  const [animateInput] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showTakenOverModal, setShowTakenOverModal] = useState(false);
   // const isConnected = useSocketConnection();
@@ -50,7 +50,6 @@ export default function Lobby() {
   const kickPlayer = useMutation(api.game.rooms.kickPlayer);
   const startGame = useMutation(api.game.flow.startGame);
   const logPromptPacksUsed = useMutation(api.analytics.logPromptPacksUsed);
-  const hasJoinedGame = useRef(false);
 
   // Streamer-safe display state: lock indicator + hide-code. Both toggles live in
   // the Settings modal (niche/host-only) — this just reflects their state.

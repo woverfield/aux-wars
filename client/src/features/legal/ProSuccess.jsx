@@ -48,7 +48,7 @@ export default function ProSuccess() {
 
       {status === 'success' && (
         <>
-          <h1 className="text-3xl font-bold mb-3">You're Pro! 🎉</h1>
+          <h1 className="text-3xl font-bold mb-3">You&apos;re Pro! 🎉</h1>
           <p className="text-gray-300 max-w-md mb-6">
             Thanks for supporting Aux Wars. Games you host are now <strong>ad-free</strong> for
             everyone in the room and support <strong>bigger lobbies</strong>.
@@ -76,7 +76,7 @@ export default function ProSuccess() {
         <>
           <h1 className="text-2xl font-bold mb-3">Payment not confirmed</h1>
           <p className="text-gray-300 max-w-md mb-6">
-            We couldn't confirm a completed payment for this session yet. If you were charged,
+            We couldn&apos;t confirm a completed payment for this session yet. If you were charged,
             give it a moment and refresh — or restore with the email you used.
           </p>
           <Link to="/pro/restore" className="text-[#68d570] underline mb-2">Restore Pro</Link>
@@ -88,7 +88,7 @@ export default function ProSuccess() {
         <>
           <h1 className="text-2xl font-bold mb-3">Something went wrong</h1>
           <p className="text-gray-300 max-w-md mb-6">
-            We couldn't verify your purchase. If you were charged, try restoring with your email,
+            We couldn&apos;t verify your purchase. If you were charged, try restoring with your email,
             or reach out via the Feedback button.
           </p>
           <Link to="/pro/restore" className="text-[#68d570] underline mb-2">Restore Pro</Link>

@@ -31,7 +31,7 @@ export function getSavedSettings() {
     if (saved) {
       return JSON.parse(saved);
     }
-  } catch (error) {
+  } catch {
     // Storage not available - return null
   }
   return null;

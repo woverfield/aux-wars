@@ -1,5 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 
 /**
  * ErrorBoundary component catches React errors in child components
@@ -27,7 +26,7 @@ class ErrorBoundary extends React.Component {
           <div className="max-w-md text-center p-8">
             <h1 className="text-3xl font-bold mb-4">Oops! Something went wrong</h1>
             <p className="text-gray-400 mb-6">
-              The game encountered an unexpected error. This shouldn't happen often!
+              The game encountered an unexpected error. This shouldn&apos;t happen often!
             </p>
             <button
               onClick={() => {

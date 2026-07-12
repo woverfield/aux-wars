@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 // GameContext removed - using Convex queries directly
 // import { useSocket } from "../services/SocketProvider";
@@ -184,7 +184,7 @@ export default function SettingsModal({ showModal, onClose, gameCode, playerId, 
       if (result?.selected === 0) {
         showToast(`Added prompt. Host prompt pool is full at ${MAX_PROMPT_POOL_SIZE}.`, "warning");
       }
-    } catch (_e) {
+    } catch {
       showToast("Failed to add prompt", "error");
     }
   };
@@ -323,7 +323,7 @@ export default function SettingsModal({ showModal, onClose, gameCode, playerId, 
     try {
       await removeCustomPromptMutation({ code: gameCode, text: promptToRemove, playerId, connectionId });
       setSelectedPrompts((prev) => prev.filter((p) => p !== promptToRemove));
-    } catch (_e) {
+    } catch {
       showToast("Failed to remove prompt", "error");
     }
   };

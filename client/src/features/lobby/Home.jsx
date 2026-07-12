@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import AnimatedLogo from "../../components/AnimatedLogo";
 import HomeBtn from "../../components/HomeBtn";
 import FeedbackModal from "../../components/FeedbackModal";
@@ -81,7 +81,7 @@ export default function Home() {
       } else {
         showToast("Failed to join hosted game", "error");
       }
-    } catch (e) {
+    } catch {
       showToast("Failed to host game", "error");
     } finally {
       setIsHosting(false);
@@ -99,7 +99,7 @@ export default function Home() {
       } else {
         throw new Error("No checkout URL");
       }
-    } catch (e) {
+    } catch {
       showToast("Couldn't start checkout. Please try again.", "error");
       setGoingPro(false);
     }
@@ -139,7 +139,7 @@ export default function Home() {
       } else {
         showToast(resp?.message || "Failed to join game.", "error");
       }
-    } catch (e) {
+    } catch {
       showToast("Failed to join game.", "error");
     }
   };

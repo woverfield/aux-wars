@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation, useParams, Outlet } from 'react-router-dom';
 // import { useSocket, useSocketConnection } from '../services/SocketProvider';
 import { useQuery } from 'convex/react';
@@ -16,7 +16,7 @@ export default function GameRouteGuard() {
   const { gameCode } = useParams();
   // const socket = useSocket();
   // const isConnected = useSocketConnection();
-  const { session, updateSession, isSessionValid } = useSession();
+  const { updateSession } = useSession();
   const [isValidating, setIsValidating] = useState(true);
   const hasInitialized = useRef(false);
   const roomData = useQuery(api.game.rooms.getRoomByCode, gameCode ? { code: gameCode } : 'skip');

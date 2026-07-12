@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -94,7 +94,7 @@ export default function PromptVoting({ gameCode }) {
     );
   }
 
-  const { skipVotes, majorityNeeded, totalPlayers } = votingStatus;
+  const { skipVotes, majorityNeeded } = votingStatus;
   const votesNeeded = majorityNeeded - skipVotes;
   const isLowTime = localTimeRemaining <= 5;
 
@@ -124,7 +124,7 @@ export default function PromptVoting({ gameCode }) {
             className="bg-[#242424] rounded-xl p-6 text-center"
           >
             <p className="text-2xl md:text-3xl font-bold text-white leading-relaxed">
-              "{displayedPrompt}"
+              &quot;{displayedPrompt}&quot;
             </p>
           </motion.div>
         </AnimatePresence>
