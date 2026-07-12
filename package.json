@@ -10,6 +10,7 @@
     "client": "cd client && npm run dev",
     "install-all": "npm install && cd client && npm install && cd ../server && npm install",
     "test": "concurrently \"npm run test:client\" \"npm run test:server\"",
+    "test:convex": "vitest run --config vitest.config.mts",
     "test:client": "cd client && npm test",
     "test:server": "cd server && npm test",
     "test:client:watch": "cd client && npm run test:ui",
@@ -19,10 +20,14 @@
     "deploy:server": "cd server && railway up"
   },
   "dependencies": {
+    "@convex-dev/presence": "^0.3.2",
     "convex": "^1.28.0",
     "youtube-search-api": "^2.0.1"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "@edge-runtime/vm": "^5.0.0",
+    "concurrently": "^9.1.2",
+    "convex-test": "^0.0.54",
+    "vitest": "^4.1.10"
   }
 }

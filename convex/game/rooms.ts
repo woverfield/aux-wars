@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { containsHateSpeech } from "./contentFilter";
+import { presence } from "../presence";
 
 function now() {
   return Date.now();
@@ -107,7 +108,6 @@ export const joinGame = mutation({
         connectionId,           // Update to new connection ID
         name: trimmedName,      // Update name in case it changed
         connectedAt: now(),     // Record when this connection was established
-        lastSeenAt: now(),      // Update last seen
         isActive: true,         // Mark this connection as active
         // Clear rate limit timestamps to prevent bypass via refresh
         lastSubmissionAttempt: undefined,
@@ -133,7 +133,6 @@ export const joinGame = mutation({
         isHost: isFirst,
         isReady: false,
         connectedAt: now(),
-        lastSeenAt: now(),
         isActive: true,
       });
 
@@ -185,7 +184,6 @@ export const rejoinGame = mutation({
       .withIndex("by_player", (q) => q.eq("playerId", playerId).eq("roomCode", code))
       .unique();
     if (!player) return { success: false, message: "Player not found in game" };
-    await ctx.db.patch(player._id, { lastSeenAt: now() });
     await touchRoom(ctx, room._id);
     return {
       success: true,
@@ -301,34 +299,20 @@ export const kickPlayer = mutation({
   },
 });
 
-export const heartbeat = mutation({
-  args: { code: v.string(), playerId: v.string(), connectionId: v.string() },
-  handler: async (ctx, { code, playerId, connectionId }) => {
-    const player = await ctx.db
-      .query("players")
-      .withIndex("by_player", (q) => q.eq("playerId", playerId).eq("roomCode", code))
-      .unique();
-
-    if (!player) {
-      return { status: 'NOT_FOUND' } as const;
-    }
-
-    // Check if THIS connection is still the active one
-    if (player.connectionId !== connectionId) {
-      // Another connection has taken over - this tab should disconnect
-      return {
-        status: 'TAKEN_OVER',
-        activeConnectionId: player.connectionId
-      } as const;
-    }
-
-    // Update last seen timestamp
-    await ctx.db.patch(player._id, { lastSeenAt: now() });
-
-    const room = await getRoomByCodeInternal(ctx, code);
-    if (room) await touchRoom(ctx, room._id);
-
-    return { status: 'OK' } as const;
+/**
+ * Reactive connection watcher (replaces the old 5s heartbeat polling).
+ * Returns the player's currently active connectionId, or null when the player
+ * is no longer in the room (kicked, or room deleted). Clients compare the
+ * result against their own connectionId: a mismatch means TAKEN_OVER, null
+ * means NOT_FOUND (clear session + navigate home). The player doc only
+ * changes on real actions now, so this subscription is quiet.
+ */
+export const getPlayerConnection = query({
+  args: { code: v.string(), playerId: v.string() },
+  handler: async (ctx, { code, playerId }) => {
+    const player = await getPlayer(ctx, code, playerId);
+    if (!player) return null;
+    return { connectionId: player.connectionId ?? null };
   },
 });
 
@@ -355,7 +339,6 @@ export const updatePlayerName = mutation({
     await ctx.db.patch(player._id, {
       name: name ? name.trim() : player.name,
       isReady: typeof isReady === "boolean" ? isReady : player.isReady,
-      lastSeenAt: now(),
     });
     const room = await getRoomByCodeInternal(ctx, code);
     if (room) await touchRoom(ctx, room._id);
@@ -633,7 +616,6 @@ function publicPlayer(player: any) {
     isHost: player.isHost,
     isReady: player.isReady,
     connectedAt: player.connectedAt,
-    lastSeenAt: player.lastSeenAt,
     isActive: player.isActive,
     submittedRounds: player.submittedRounds,
   };
@@ -711,6 +693,9 @@ async function deleteRoomAndData(ctx: any, room: any) {
 
   // Finally delete the room itself
   await ctx.db.delete(room._id);
+
+  // Clear the room's presence state in the component too.
+  await presence.removeRoom(ctx, code);
 
   console.log(`[deleteRoomAndData] Deleted room ${code} and all associated data`);
 }
