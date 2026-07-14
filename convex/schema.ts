@@ -187,5 +187,17 @@ export default defineSchema({
     date: v.string(),
     visitorId: v.string(),
   }).index("by_date_and_visitor", ["date", "visitorId"]),
+
+  // --- Durable metric snapshots ---
+  // One row per UTC day banking the all-time cumulative counters as they stood
+  // that day (analyticsAggregates action counts + permanent pageview totals).
+  // Raw analyticsEvents prune after 90 days, but diffing two snapshots recovers
+  // any window (7d/30d/yearly) forever. `metrics` is an open key->count map so
+  // new counters (e.g. new event types) are captured without a schema change.
+  metricSnapshots: defineTable({
+    date: v.string(), // UTC "YYYY-MM-DD"
+    capturedAt: v.number(),
+    metrics: v.record(v.string(), v.number()),
+  }).index("by_date", ["date"]),
 });
 
