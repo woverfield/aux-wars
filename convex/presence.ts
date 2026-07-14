@@ -5,8 +5,8 @@ import { mutation, query } from "./_generated/server";
 
 // Presence lives in the @convex-dev/presence component's sandboxed tables.
 // Steady-state heartbeats write nothing to game docs, so they never invalidate
-// game queries. See docs/context/builder-protocol.md ("Convex-specific law"):
-// never fold presence timestamps back into rooms/players docs.
+// game queries. See docs/context/convex-conventions.md: never fold presence
+// timestamps back into rooms/players docs.
 export const presence = new Presence(components.presence);
 
 // Server-side clamp on the client-supplied heartbeat interval. The component
