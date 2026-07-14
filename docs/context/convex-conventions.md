@@ -1,11 +1,9 @@
 # Convex conventions
 
-Rules for writing Convex functions in this repo. They exist because a June/July
-2026 billing cycle blew past the Pro plan limits (28M function calls against 25M
-included, 83GB database I/O against 50GB) on a game whose real traffic was a few
-hundred games a week. The cause was a single 5-second mutation that wrote a
-timestamp to two documents. Read this before adding any query, mutation, or
-scheduled function that runs during an active game.
+Rules for writing Convex functions in this repo. Read this before adding any
+query, mutation, or scheduled function that runs during an active game. Breaking
+them does not fail a test, it silently multiplies function-call volume and
+database I/O until the deployment exceeds its plan limits.
 
 ## Invalidation is document-level
 
@@ -16,7 +14,7 @@ touched that document, for *every* connected client, and each of those re-runs
 is billed as a function call.
 
 The blast radius multiplies: writes per second, times subscribed queries, times
-clients in the room. A 5-second heartbeat in an 8-player room produced roughly
+clients in the room. A 5-second heartbeat in an 8-player room is on the order of
 550k function calls per room-day on its own.
 
 ## Never put hot or heartbeat timestamps on game documents
