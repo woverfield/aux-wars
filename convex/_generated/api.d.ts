@@ -16,6 +16,7 @@ import type * as game_flow from "../game/flow.js";
 import type * as game_rooms from "../game/rooms.js";
 import type * as game_scheduler from "../game/scheduler.js";
 import type * as http from "../http.js";
+import type * as metricsRollup from "../metricsRollup.js";
 import type * as news from "../news.js";
 import type * as presence from "../presence.js";
 import type * as siteStats from "../siteStats.js";
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   "game/rooms": typeof game_rooms;
   "game/scheduler": typeof game_scheduler;
   http: typeof http;
+  metricsRollup: typeof metricsRollup;
   news: typeof news;
   presence: typeof presence;
   siteStats: typeof siteStats;

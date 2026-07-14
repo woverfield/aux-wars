@@ -28,6 +28,12 @@ crons.daily(
   internal.siteStats.pruneVisits
 );
 
+crons.daily(
+  "daily metric snapshot",
+  { hourUTC: 8, minuteUTC: 10 }, // stable once-daily capture of cumulative counters
+  internal.metricsRollup.snapshotDailyMetrics
+);
+
 export default crons;
 
 
