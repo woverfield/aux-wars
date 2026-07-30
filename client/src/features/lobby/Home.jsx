@@ -147,7 +147,7 @@ export default function Home() {
   return (
     <div className="home h-full overflow-y-auto flex flex-col items-center relative z-20">
       {/* SEO heading (indexed; logo is the visual title) */}
-      <h1 className="sr-only">Aux Wars — Free Online Music Party Game with Friends</h1>
+      <h1 className="sr-only">Aux Wars: Online Aux Battle Music Party Game with Friends</h1>
 
       {/* Play area — natural height, stacks directly above the sections (skribbl-style) */}
       <section className="w-full flex flex-col items-center px-4 pt-3">
@@ -208,11 +208,12 @@ export default function Home() {
         <div className="bg-white/5 border border-white/10 rounded-xl p-5">
           <h2 className="text-xl font-bold text-white mb-3">About</h2>
           <p className="text-sm text-gray-300 leading-relaxed">
-            <strong className="text-white">Aux Wars</strong> is a free online music party game.
+            <strong className="text-white">Aux Wars</strong> is a free online music party game:
+            the classic aux battle, playable in your browser.
             Get a prompt, pick the perfect song, rate everyone&rsquo;s picks, and crown the winner.
           </p>
           <p className="text-sm text-gray-400 leading-relaxed mt-3">
-            No signups, no downloads — just share a code and play with friends on any device.
+            No signups, no downloads, just share a code and play with friends on any device.
           </p>
           <LiveStats />
         </div>
