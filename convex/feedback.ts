@@ -168,6 +168,35 @@ export const updateStatus = internalMutation({
 });
 
 /**
+ * Internal admin helper for deleting a feedback row outright (e.g. entries
+ * submitted by the maintainer during testing). Refuses to delete a merge
+ * parent so child rows never point at a missing document.
+ *
+ * Run from CLI/dashboard only, e.g.
+ * npx convex run feedback:deleteFeedback '{"feedbackId":"..."}' --prod
+ */
+export const deleteFeedback = internalMutation({
+  args: {
+    feedbackId: v.id("feedback"),
+  },
+  handler: async (ctx, args) => {
+    const doc = await ctx.db.get(args.feedbackId);
+    if (!doc) {
+      throw new Error("Feedback not found");
+    }
+    const children = await ctx.db
+      .query("feedback")
+      .filter((q) => q.eq(q.field("mergedInto"), args.feedbackId))
+      .collect();
+    if (children.length > 0) {
+      throw new Error("Cannot delete a merge parent; delete or re-merge its children first");
+    }
+    await ctx.db.delete(args.feedbackId);
+    return { success: true };
+  },
+});
+
+/**
  * Merge duplicate feedback into a canonical request.
  *
  * The child rows stay in the database and are returned nested under the parent
